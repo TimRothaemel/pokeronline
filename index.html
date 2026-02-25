@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Poker – Einfaches UI</title>
+    <link rel="stylesheet" href="main.css">
+    <script async src="karten.js"></script>
+</head>
+<body>
+
+<h1>Poker</h1>
+
+<div id="spielfeld">
+
+    <div id="gegner_bereich" class="bereich">
+        <h2>Gegner</h2>
+        <div class="karten" id="gegner_karten">
+            <div class="karte" id="karten_gegner"></div>
+            <div class="karte" id="karten_gegner1"></div>
+        </div>
+        <p>Chips: <span class="chip" id="g"></span></p>
+    </div>
+
+    <div class="bereich">
+        <h2>Gemeinschaftskarten</h2>
+        <div class="karten" id="gemeinschaftskarten">
+            <div class="karte" id="flop1">–</div>
+            <div class="karte" id="flop2">–</div>
+            <div class="karte" id="flop3">–</div>
+            <div class="karte" id="turn">–</div>
+            <div class="karte" id="river">–</div>
+        </div>
+    </div>
+
+    <div id="spieler_bereich" class="bereich">
+        <h2>Spieler</h2>
+        <div class="karten" id="spieler_karten">
+            <div class="karte"></div>
+            <div class="karte"></div>
+        </div>
+        <p>Chips: <span class="chip" id="spieler_chips">1000</span></p>
+    </div>
+
+    <div id="aktionen" class="bereich">
+        <h2>Aktionen</h2>
+        <button id="btn_checken">Checken</button>
+        <button id="btn_mitgehen">Gehen</button>
+        <button id="btn_erhoehen">Erhöhe</button>
+        <button id="btn_passen">Passe</button>
+    </div>
+
+
+</div>
+
+</body>
+</html>

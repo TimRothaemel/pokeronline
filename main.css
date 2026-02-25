@@ -1,0 +1,65 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #0b6623;
+    color: white;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+#spielfeld {
+    max-width: 900px;
+    margin: auto;
+    background-color: #146b2e;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.bereich {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #1e7f3b;
+    border-radius: 8px;
+}
+
+.karten {
+    display: flex;
+    gap: 10px;
+}
+
+.karte {
+    width: 70px;
+    height: 100px;
+    background-color: white;
+    color: black;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+#aktionen button {
+    margin-right: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#aktionen button:hover {
+    opacity: 0.9;
+}
+
+.chip {
+    background-color: gold;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-left: 10px;
+}
