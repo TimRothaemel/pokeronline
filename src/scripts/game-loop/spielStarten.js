@@ -35,14 +35,20 @@ function spielStarten(){
 }
 
 spielStarten()
-function flopsAufdecken()
+function flopsAufdecken(){
+    gemeinschaftsKarten1.src = `./assets/${flop1.name}.png`
+    gemeinschaftsKarten2.src = `./assets/${flop2.name}.png`
+    gemeinschaftsKarten3.src = `./assets/${flop3.name}.png`
+    gemeinschaftsKarten4.src = `./assets/${turn.name}.png`
+    gemeinschaftsKarten5.src = `./assets/${river.name}.png`
+}
 
-let spielerKarte1 = document.getElementById()
-let spielerKarte2 = document.getElementById()
-let gegnerKarte1 = document.getElementById()
-let gegnerKarte2 = document.getElementById()
-let gemeinschaftsKarten1 document.getElementById('flop1')
-let gemeinschaftsKarten2 document.getElementById('flop2')
-let gemeinschaftsKarten3 document.getElementById('flop3')
-let gemeinschaftsKarten4 document.getElementById('turn')
-let gemeinschaftsKarten5 document.getElementById('river')
+let spielerKarte1 = document.getElementById('spielerKarte1')
+let spielerKarte2 = document.getElementById('spielerKarte2')
+let gegnerKarte1 = document.getElementById('gegnerKarte1')
+let gegnerKarte2 = document.getElementById('gegnerKarte2')
+let gemeinschaftsKarten1 = document.getElementById('flop1')
+let gemeinschaftsKarten2 = document.getElementById('flop2')
+let gemeinschaftsKarten3 = document.getElementById('flop3')
+let gemeinschaftsKarten4 = document.getElementById('turn')
+let gemeinschaftsKarten5 = document.getElementById('river')
