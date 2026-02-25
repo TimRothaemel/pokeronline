@@ -1,7 +1,7 @@
 // Gemeindschaftskarten (ziehen + Array)
 
-import {karten} from "./karten.js";  // importieren der Karten aus karten.js
-import {kartenSpiel, zufaelligeKarteZiehen} from "./zufaelligeKarte.js";  // importieren der zufaelligeKarteZiehen Funktion aus zufaelligeKarteZiehen.js
+import {karten} from "../karten/karten.js";  // importieren der Karten aus karten.js
+import {kartenSpiel, zufaelligeKarteZiehen} from "../karten/zufaelligeKarte.js";  // importieren der zufaelligeKarteZiehen Funktion aus zufaelligeKarteZiehen.js
 
 
 function kartenZiehen(){
