@@ -7,7 +7,7 @@ export function zufaelligeKarteZiehen() {
   let randomNumber = zufaelligeZahl();
   let Karte = kartenSpiel[randomNumber];
   kartenWeg(randomNumber);
-  return Karte
+  return Karte;
 }
 function kartenWeg(randomNumber) {
   // Funktion zum Entfernen der gezogenen Karte aus dem Kartenstapel
