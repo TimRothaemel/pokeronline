@@ -10,9 +10,9 @@ Spieler können:
 ## Technologien
 
 ### Frontend
-- **HTML**: Struktur der Webseite, Darstellung von Tischen, Karten und Buttons.
+- **HTML**: Struktur der Webseite, Darstellung von Tischen, cards und Buttons.
 - **CSS**: Styling der Webseite, inklusive responsivem Layout und Animationen.
-- **JavaScript**: Spiel-Logik, Benutzerinteraktionen, Kartenausgabe und Echtzeit-Updates.
+- **JavaScript**: Spiel-Logik, Benutzerinteraktionen, cardsausgabe und Echtzeit-Updates.
 
 ### Backend & Datenbank
 - **Supabase**: Echtzeit-Datenbank und Authentifizierung. Supabase wird genutzt für:
@@ -31,13 +31,13 @@ Spieler können:
 
 2. **Poker-Logik**
    - Klassische Texas Hold'em Regeln.
-   - Karten mischen, austeilen und Runde durchführen.
+   - cards mischen, austeilen und Runde durchführen.
    - Verwaltung von Chips, Einsätzen, Pots und Gewinnerberechnung.
 
 3. **Multiplayer & Echtzeit**
    - Spieler können sich zu Tischen verbinden.
    - Echtzeit-Synchronisation aller Spielaktionen via Supabase Realtime.
-   - Live-Updates für Einsätze, Karten und Spielzüge.
+   - Live-Updates für Einsätze, cards und Spielzüge.
 
 ## Zielsetzung
 - Erstellung eines voll funktionsfähigen Online-Pokerspiels.
