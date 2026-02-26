@@ -45,7 +45,7 @@ export const cards = [
         value: 12
     }, {
         color: "Karo",
-        number: "Koenig",
+        number: "King",
         value: 13
     }, {
         color: "Karo",
@@ -97,7 +97,7 @@ export const cards = [
         value: 12
     }, {
         color: "Kreuz",
-        number: "Koenig",
+        number: "King",
         value: 13
     }, {
         color: "Kreuz",
@@ -149,7 +149,7 @@ export const cards = [
         value: 12
     }, {
         color: "Pik",
-        number: "Koenig",
+        number: "King",
         value: 13
     }, {
 
@@ -202,7 +202,7 @@ export const cards = [
         value: 12
     }, {
         color: "Herz",
-        number: "Koenig",
+        number: "King",
         value: 13
     }, {
         color: "Herz",
