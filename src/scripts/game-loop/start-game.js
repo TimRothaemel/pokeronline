@@ -4,13 +4,7 @@ import { gameCards, getRandomCard } from "../cards/random-cards.js"; // import g
 export let player = {
   name: "player",
   coins: 1000,
-  cards: []
-};
-
-let apponent = {
-  name: "opponent",
-  coins: 1000,  
-  cards: []
+  cards: [],
 };
 
 export let flop1, flop2, flop3, turn, river; // export community cards for game-sequence.js
@@ -18,10 +12,6 @@ export let flop1, flop2, flop3, turn, river; // export community cards for game-
 function drawPlayerCards() {
   player.cards.unshift(getRandomCard()); //random cards for player
   player.cards.unshift(getRandomCard());
-
-  apponent.cards.unshift(getRandomCard()); //random cards for apponent
-  apponent.cards.unshift(getRandomCard());
-  console.log(player, apponent);
 }
 
 function drawCommunityCards() {
