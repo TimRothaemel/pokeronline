@@ -4,44 +4,40 @@
     <meta charset="UTF-8" />
     <title>Poker – Einfaches UI</title>
     <link rel="stylesheet" href="main.css" />
-    <script type="module" async src="/src/scripts/game-loop/start-game.js"></script>
-    <script type="module" async src="/src/scripts/game-loop/game-sequence.js"></script>
+    <script
+      type="module"
+      async
+      src="/src/scripts/game-loop/start-game.js"
+    ></script>
+    <script
+      type="module"
+      async
+      src="/src/scripts/game-loop/game-sequence.js"
+    ></script>
   </head>
   <body>
     <h1>pokeronline</h1>
-
-    <div id="spielfeld">
-      <div id="gegner_bereich" class="bereich">
-        <h2>Gegner</h2>
-        <div class="cards" id="gegner_cards">
-          <div class="karte" id="cards_gegner"></div>
-          <div class="karte" id="cards_gegner1"></div>
-        </div>
-        <p>Chips: <span class="chip" id="g"></span></p>
-      </div>
-
-      <div class="bereich">
-        <h2>Gemeinschaftscards</h2>
-        <div class="cards" id="gemeinschaftscards">
-          <div class="karte" id="flop1">–</div>
-          <div class="karte" id="flop2">–</div>
-          <div class="karte" id="flop3">–</div>
-          <div class="karte" id="turn">–</div>
-          <div class="karte" id="river">–</div>
+    <div id="game-area-wrapper">
+      <div class="table">
+        <div class="cards" id="communitycards">
+          <div class="card" id="flop1">–</div>
+          <div class="card" id="flop2">–</div>
+          <div class="card" id="flop3">–</div>
+          <div class="card" id="turn">–</div>
+          <div class="card" id="river">–</div>
         </div>
       </div>
 
-      <div id="spieler_bereich" class="bereich">
+      <div id="player-table" class="table">
         <h2>Spieler</h2>
-        <div class="cards" id="spieler_cards">
-          <div class="karte" id="spielerKarte1"></div>
-          <div class="karte" id="spielerKarte2"></div>
+        <div class="cards" id="playercards">
+          <div class="card" id="playercard1"></div>
+          <div class="card" id="playercard2"></div>
         </div>
         <p>Chips: <span class="chip" id="player-coins"></span></p>
       </div>
 
-      <div id="aktionen" class="bereich">
-        <h2>Aktionen</h2>
+      <div id="actions" class="table">
         <button id="btn_checken">Checken</button>
         <button id="btn_mitgehen">Gehen</button>
         <button id="btn_erhoehen">Erhöhe</button>

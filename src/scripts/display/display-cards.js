@@ -12,8 +12,8 @@ export function revealCard(id, src) {
   document.getElementById(id).innerHTML = `<img src="${src}" alt="card">`;
 }
 
-let playerCard1 = "spielerKarte1";
-let playerCard2 = "spielerKarte2";
+let playerCard1 = "playercard1";
+let playerCard2 = "playercard2";
 let communityCard1 = "flop1";
 let communityCard2 = "flop2";
 let communityCard3 = "flop3";
