@@ -1,0 +1,247 @@
+/* --- Reset & Basis --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0d0d0d 100%);
+  color: #f5e8c0;
+  min-height: 100vh;
+  padding: 30px 20px;
+}
+
+/* --- Titel --- */
+h1 {
+  text-align: center;
+  font-size: 2.2rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  text-shadow: 0 0 20px rgba(201, 168, 76, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8);
+  margin-bottom: 30px;
+}
+
+h2 {
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+/* --- Äußerer Rahmen (Tischrand) --- */
+#game-area-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  background: radial-gradient(ellipse at center, #127a3d 0%, #0d5c2f 100%);
+  border-radius: 20px;
+  padding: 24px;
+  border: 8px solid #7a5410;
+  box-shadow:
+    0 0 0 2px #2a1a00,
+    0 0 0 4px #c9a84c,
+    0 0 0 6px #2a1a00,
+    0 30px 80px rgba(0, 0, 0, 0.9);
+}
+
+/* --- Tischbereiche --- */
+.table {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+.table:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Karten-Reihe --- */
+.cards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#communitycards {
+  justify-content: center;
+}
+
+/* --- Karte --- */
+.card {
+  width: 72px;
+  height: 108px;
+  background: #fdf6e3;
+  color: #1a1a1a;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  position: relative;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.6),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.7),
+    0 4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Leere / verdeckte Karte */
+#flop1,
+#flop2,
+#flop3,
+#turn,
+#river,
+#playercard1,
+#playercard2 {
+  background: linear-gradient(145deg, #0c6631, #0a4a22);
+  color: rgba(201, 168, 76, 0.35);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  font-size: 1.8rem;
+}
+
+/* --- Chips-Anzeige --- */
+p {
+  margin-top: 14px;
+  font-style: italic;
+  color: #f5e8c0;
+  font-size: 0.95rem;
+}
+
+.chip {
+  display: inline-block;
+  background: linear-gradient(135deg, #8b6914, #c9a84c, #e8c97a, #c9a84c, #8b6914);
+  color: #1a0e00;
+  padding: 5px 18px;
+  border-radius: 50px;
+  font-family: Georgia, serif;
+  font-weight: bold;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  margin-left: 8px;
+  box-shadow:
+    0 3px 12px rgba(201, 168, 76, 0.45),
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(139, 105, 20, 0.5);
+}
+
+/* --- Aktions-Buttons --- */
+#actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px 20px;
+}
+
+#actions button {
+  padding: 12px 26px;
+  font-family: Georgia, serif;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+#actions button:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.12);
+}
+
+#actions button:active {
+  transform: scale(0.96);
+}
+
+/* Check */
+#btn_checken {
+  background: linear-gradient(145deg, #1e6b3a, #27ae60);
+  color: #b9ffd6;
+  box-shadow: 0 4px 14px rgba(39, 174, 96, 0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  border: 1px solid rgba(39, 174, 96, 0.5);
+}
+
+#btn_checken:hover {
+  box-shadow: 0 8px 24px rgba(39, 174, 96, 0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Call / Mitgehen */
+#btn_mitgehen {
+  background: linear-gradient(145deg, #1a4a7a, #1565c0);
+  color: #b3d9ff;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  border: 1px solid rgba(21, 101, 192, 0.5);
+}
+
+#btn_mitgehen:hover {
+  box-shadow: 0 8px 24px rgba(21, 101, 192, 0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Erhöhen / Raise */
+#btn_erhoehen {
+  background: linear-gradient(135deg, #8b6914, #c9a84c, #e8c97a);
+  color: #1a0e00;
+  box-shadow: 0 4px 18px rgba(201, 168, 76, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+  border: 1px solid rgba(139, 105, 20, 0.5);
+}
+
+#btn_erhoehen:hover {
+  box-shadow: 0 8px 28px rgba(201, 168, 76, 0.7), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* Passen / Fold */
+#btn_passen {
+  background: linear-gradient(145deg, #5c1a1a, #922b21);
+  color: #ffb3b3;
+  box-shadow: 0 4px 14px rgba(146, 43, 33, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid rgba(146, 43, 33, 0.5);
+}
+
+#btn_passen:hover {
+  box-shadow: 0 8px 24px rgba(146, 43, 33, 0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    width: 58px;
+    height: 88px;
+    font-size: 1rem;
+  }
+
+  .cards {
+    gap: 8px;
+  }
+
+  #actions {
+    gap: 8px;
+  }
+
+  #actions button {
+    padding: 10px 16px;
+    font-size: 0.75rem;
+  }
+}
