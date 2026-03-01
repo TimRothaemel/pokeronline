@@ -1,4 +1,4 @@
-async function addBot(roomId) {
+async function addBot(roomId) { //added Bot to game
   await supabase.from("players").insert([
     {
       id: crypto.randomUUID(),

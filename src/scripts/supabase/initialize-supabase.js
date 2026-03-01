@@ -4,8 +4,8 @@ const anonKey ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const url = "https://dbrxrtbfyltyfdnlbcfy.supabase.co"
 
 // Create a single supabase client for interacting with your database
-const supabaseClient = createClient(url, anonKey)
+const supabase = createClient(url, anonKey)
 
-console.log("Supabase client initialized:", supabaseClient);
+console.log("Supabase client initialized:", supabase);
 
-export default supabaseClient
+export default supabase

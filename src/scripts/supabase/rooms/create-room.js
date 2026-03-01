@@ -1,5 +1,6 @@
 import { getPlayerId } from "../player/get-player-id.js";// import getPlayerId() function
 import { hashPassword } from "../../general/password-hash.js";// import hashPassword() function
+import  supabase  from "../initialize-supabase.js";
 
 export async function createRoom(roomName, password, nickname) {
   const playerId = getPlayerId();
