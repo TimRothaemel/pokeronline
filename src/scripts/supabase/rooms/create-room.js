@@ -1,0 +1,35 @@
+import { getPlayerId } from "../player/get-player-id.js";// import getPlayerId() function
+import { hashPassword } from "../../general/password-hash.js";// import hashPassword() function
+
+export async function createRoom(roomName, password, nickname) {
+  const playerId = getPlayerId();
+
+  const passwordHash = await hashPassword(password);
+
+  const { data: room, error } = await supabase
+    .from("rooms")
+    .insert([
+      {
+        name: roomName,
+        password_hash: passwordHash,
+        host_player_id: playerId,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await supabase.from("players").insert([
+    {
+      id: playerId,
+      nickname: nickname,
+      room_id: room.id,
+    },
+  ]);
+
+  console.log("Raum erstellt:", room);
+}
