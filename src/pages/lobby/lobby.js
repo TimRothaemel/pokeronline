@@ -1,7 +1,17 @@
-import { loadPlayers } from "../../scripts/supabase/player/load-player.js"; // import loadPlayers() function
+import { loadPlayers } from "../../scripts/supabase/player/load-player.js";
 
-roomId = localStorage.getItem("room_id"); // get room_id from localStorage
+const roomId = localStorage.getItem("room_id");
 
-players = loadPlayers(roomId); // load players in the room using loadPlayers() function
+if (!roomId) {
+  alert("Kein Raum gefunden.");
+  window.location.href = "/";
+}
 
-console.log(players); // log players for debugging
+async function initLobby() {
+  const players = await loadPlayers(roomId);
+
+  console.log("Geladene Spieler:", players);
+
+}
+
+initLobby();

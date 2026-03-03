@@ -27,10 +27,6 @@ export async function createRoom(roomName, password, nickname) {
     }
     return;
   }
-  if (error) {
-    alert(error.message);
-    return;
-  }
 
   await supabase.from("players").insert([
     // insert new player into "players" table
