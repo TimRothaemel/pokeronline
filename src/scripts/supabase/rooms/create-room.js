@@ -19,13 +19,13 @@ export async function createRoom(roomName, password, nickname) {
     .select()
     .single();
 
-  if (error) {
+if (error) {
     if (error.code === "23505") {
       alert("Dieser Raumname existiert bereits.");
     } else {
       alert(error.message);
     }
-    return;
+    return error; 
   }
 
   await supabase.from("players").insert([

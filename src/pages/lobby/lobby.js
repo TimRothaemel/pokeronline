@@ -11,7 +11,7 @@ async function initLobby() {
   const players = await loadPlayers(roomId);
 
   console.log("Geladene Spieler:", players);
-
+  
 }
 
 initLobby();
