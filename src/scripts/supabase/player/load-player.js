@@ -1,4 +1,4 @@
-async function loadPlayers(roomId) {
+export async function loadPlayers(roomId) {
   const { data } = await supabase
     .from("players")
     .select("*")
