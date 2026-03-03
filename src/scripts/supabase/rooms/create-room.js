@@ -1,9 +1,10 @@
 import { getPlayerId } from "../player/get-player-id.js"; // import getPlayerId() function
 import { hashPassword } from "../../general/password-hash.js"; // import hashPassword() function
 import supabase from "../initialize-supabase.js"; //import supabase client instance
+import { generateNewPlayerId } from "../player/new-player-id.js";
 
 export async function createRoom(roomName, password, nickname) {
-  const playerId = getPlayerId();
+  const playerId = await generateNewPlayerId();
 
   const passwordHash = await hashPassword(password);
 
@@ -34,6 +35,7 @@ if (error) {
       id: playerId,
       nickname: nickname,
       room_id: room.id,
+      host: true,// set host to true for the player who created the room
     },
   ]);
   localStorage.setItem("room_id", room.id); // store room_id in localStorage for later use

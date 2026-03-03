@@ -17,6 +17,7 @@ async function initLobby() {
   // Initialize lobby by loading players and updating UI
   const players = await loadPlayers(roomId);
   displayPlayers(players);
+  console.log("Aktuelle Spieler im Raum:", players);
   if (players.length >= 2) {
     document.getElementById("start-game-btn").disabled = false;
   }
@@ -25,11 +26,14 @@ async function initLobby() {
   } else {
     document.getElementById("add-bot-btn").disabled = true;
   }
+  if (players.length >=6) {
+    console.warn("Maximale Spieleranzahl erreicht. Kein weiterer Bot kann hinzugefügt werden.");
+  }
 }
 
 addBotBtn.addEventListener("click", async () => {
   // Add bot to game and refresh lobby
-  addBot(roomId);
+  await addBot(roomId);
   initLobby();
 });
 
@@ -39,5 +43,4 @@ if (startGameBtn) {
     window.location.href = "../game/game.html"; // Redirect to game page after starting the game
   });
 }
-
 initLobby(); // Start lobby initialization on page load
