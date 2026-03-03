@@ -13,7 +13,7 @@ submitBtn.addEventListener("click", () => {
   }
 
   console.log(userName, roomName, roomPassword);// Log input values for debugging
-  createRoom(userName, roomName, roomPassword); // Call createRoom function with user input
+  createRoom(roomName, roomPassword, userName); // Call createRoom function with user input
 
   window.location.href = "/src/pages/lobby/lobby.html";// Redirect to lobby after creating room
 });
