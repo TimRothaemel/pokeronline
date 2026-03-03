@@ -1,4 +1,5 @@
-import { createRoom } from "../../scripts/supabase/rooms/create-room";
+import { createRoom } from "../../scripts/supabase/rooms/create-room";// import createRoom() function
+import { joinRoom } from "../../scripts/supabase/rooms/join-rooms";// import joinRoom() function
 
 const submitBtn = document.querySelector('input[type="submit"]');
 
@@ -12,6 +13,8 @@ submitBtn.addEventListener("click", () => {
     return;
   }
 
-  console.log(userName, roomName, roomPassword);
-  createRoom({ userName, roomName, roomPassword });
+  console.log(userName, roomName, roomPassword);// Log input values for debugging
+  createRoom(userName, roomName, roomPassword); // Call createRoom function with user input
+
+  window.location.href = "/src/pages/game/lobby.html";// Redirect to lobby after creating room
 });

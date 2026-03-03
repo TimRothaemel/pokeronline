@@ -1,6 +1,6 @@
 import { getPlayerId } from "../player/get-player-id.js";// import getPlayerId() function
 import { hashPassword } from "../../general/password-hash.js";// import hashPassword() function
-import  supabase  from "../initialize-supabase.js";
+import  supabase  from "../initialize-supabase.js"; //import supabase client instance
 
 export async function createRoom(roomName, password, nickname) {
   const playerId = getPlayerId();
@@ -24,7 +24,7 @@ export async function createRoom(roomName, password, nickname) {
     return;
   }
 
-  await supabase.from("players").insert([
+  await supabase.from("players").insert([// insert new player into "players" table
     {
       id: playerId,
       nickname: nickname,
