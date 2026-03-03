@@ -5,7 +5,5 @@ export async function loadPlayers(roomId) {
     .from("players")
     .select("*")
     .eq("room_id", roomId);
-    console.log("Players loaded from Supabase:", data);
-    console.log("Room ID for loading players:", roomId);
   return data;
 }

@@ -1,4 +1,6 @@
-async function addBot(roomId) { //added Bot to game
+import supabase from "../initialize-supabase";
+
+export async function addBot(roomId) { //added Bot to game
   await supabase.from("players").insert([
     {
       id: crypto.randomUUID(),
