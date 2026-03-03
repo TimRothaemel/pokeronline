@@ -1,6 +1,7 @@
 import { loadPlayers } from "../../scripts/supabase/player/load-player.js"; //import { loadPlayers } from "../../scripts/supabase/player/load-player.js";
 import { displayPlayers } from "../../components/player-list/player-list.js"; //import { displayPlayers } from "../../components/player-list/player-list.js";
 import { addBot } from "../../scripts/supabase/bot/add-bot.js"; //import { addBot } from "../../scripts/supabase/bot/add-bot.js";
+import { startGame } from "../../scripts/game-loop/start-game.js"; //import { startGame } from "../../scripts/supabase/game/start-game.js";
 
 const roomId = localStorage.getItem("room_id");
 const addBotBtn = document.getElementById("add-bot-btn");
@@ -34,8 +35,8 @@ addBotBtn.addEventListener("click", async () => {
 
 if (startGameBtn) {
   startGameBtn.addEventListener("click", async () => {
-    await fetch(`/api/rooms/${roomId}/start-game`, { method: "POST" });
-    window.location.href = `/game.html?room_id=${roomId}`;
+    startGame();
+    window.location.href = "../game/game.html"; // Redirect to game page after starting the game
   });
 }
 

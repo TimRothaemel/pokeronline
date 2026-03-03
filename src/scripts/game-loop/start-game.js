@@ -23,11 +23,11 @@ function drawCommunityCards() {
   river = getRandomCard();
 }
 
-function spielStarten() {
+export function startGame() {
   //start game
   gameCards.push(...cards); // reset gameCards array to original cards array
   drawPlayerCards();
   drawCommunityCards();
 }
 
-spielStarten(); // start game when page loads
+
