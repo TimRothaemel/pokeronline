@@ -1,9 +1,24 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
+
+async function loadPlayers(roomId: string) {
+  const { data, error } = await supabase
+    .from("players")
+    .select("*")
+    .eq("room_id", roomId);
+
+  if (error) throw error;
+  return data;
+}
 
 async function generateSeatPositions(roomId: string): Promise<void> {
   const players = await loadPlayers(roomId);
@@ -27,7 +42,6 @@ async function generateSeatPositions(roomId: string): Promise<void> {
 }
 
 Deno.serve(async (req: Request) => {
-  // CORS Preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -47,4 +61,5 @@ Deno.serve(async (req: Request) => {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+  console.log("Setup Room function is running...");
 });

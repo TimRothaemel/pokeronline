@@ -36,8 +36,12 @@ export function startGame() {
   drawCommunityCards();
 }
 
-if (await checkHost(roomId)) {// check if current user is host of the room
+if (await checkHost(roomId)) {
   const { data, error } = await supabase.functions.invoke('setup-room', {
-  body: { foo: 'bar' }
-})
+    body: { roomId: roomId }
+  });
+
+  if (error) {
+    console.error('Fehler:', error);
+  }
 }
