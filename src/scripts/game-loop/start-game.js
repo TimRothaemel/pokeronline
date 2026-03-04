@@ -1,8 +1,8 @@
 import { cards } from "../cards/cards.js"; // import cards array from cards.js
 import { gameCards, getRandomCard } from "../cards/random-cards.js"; // import gameCards array and getRandomCard function from random-cards.js
 import { checkHost } from "../supabase/player/check-host.js";
-import { generateSeatPositions } from "../supabase/player/generate-seat-positions.js";
 import { loadPlayers } from "../supabase/player/load-player.js";
+import supabase from "../supabase/initialize-supabase.js"; // import supabase client
 
 const roomId = localStorage.getItem("room_id"); // get room_id from localStorage for later use
 
@@ -37,5 +37,7 @@ export function startGame() {
 }
 
 if (await checkHost(roomId)) {// check if current user is host of the room
-  generateSeatPositions(roomId); // generate seat positions for players in the room if current user is host
+  const { data, error } = await supabase.functions.invoke('setup-room', {
+  body: { foo: 'bar' }
+})
 }
