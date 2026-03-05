@@ -1,26 +1,28 @@
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "jsr:@supabase/supabase-js";// import createClient function from supabase-js library to create a supabase client instance
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+const corsHeaders = { // CORS headers to allow cross-origin requests
+  "Access-Control-Allow-Origin": "*", // allow requests from any origin
+  "Access-Control-Allow-Methods": "POST, OPTIONS", // allow POST and OPTIONS methods
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",// allow specific headers in requests
 };
 
-const supabase = createClient(
+const supabase = createClient(// create a supabase client instance using environment variables for URL and service role key
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
-async function loadPlayers(roomId: string) {
+async function loadPlayers(roomId: string) { // function to load players from the database based on the room ID
   const { data, error } = await supabase
     .from("players")
     .select("*")
     .eq("room_id", roomId);
 
   if (error) throw error;
+  console.log("Loaded players:", data);
   return data;
 }
 
-async function generateSeatPositions(roomId: string): Promise<void> {
+async function generateSeatPositions(roomId: string): Promise<void> { // function to generate random seat positions for players in a room
   const players = await loadPlayers(roomId);
 
   const seats = Array.from({ length: players.length }, (_, i) => i);
@@ -38,6 +40,7 @@ async function generateSeatPositions(roomId: string): Promise<void> {
     if (error) {
       console.error(`Fehler bei Spieler ${players[i].id}:`, error);
     }
+    console.log(`Spieler ${players[i].id} erhält Sitzplatz ${seats[i]}`);
   }
 }
 
@@ -57,9 +60,8 @@ Deno.serve(async (req: Request) => {
 
   await generateSeatPositions(roomId);
 
-  return new Response(JSON.stringify({ success: true }), {
+  return new Response(JSON.stringify({ success: true, message: "Room setup completed successfully" }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-  console.log("Setup Room function is running...");
 });

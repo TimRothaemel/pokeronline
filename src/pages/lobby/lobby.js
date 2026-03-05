@@ -17,7 +17,6 @@ async function initLobby() {
   // Initialize lobby by loading players and updating UI
   const players = await loadPlayers(roomId);
   displayPlayers(players);
-  console.log("Aktuelle Spieler im Raum:", players);
   if (players.length >= 2) {
     document.getElementById("start-game-btn").disabled = false;
   }
@@ -34,12 +33,12 @@ async function initLobby() {
 addBotBtn.addEventListener("click", async () => {
   // Add bot to game and refresh lobby
   await addBot(roomId);
-  initLobby();
+  initLobby();// Refresh lobby after adding bot to show updated player list and button states
 });
 
-if (startGameBtn) {
+if (startGameBtn) {// Check if startGameBtn exists before adding event listener to avoid errors
   startGameBtn.addEventListener("click", async () => {
-    startGame();
+    await startGame();
     window.location.href = "../game/game.html"; // Redirect to game page after starting the game
   });
 }

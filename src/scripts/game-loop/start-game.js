@@ -29,14 +29,8 @@ function drawCommunityCards() {
   river = getRandomCard();
 }
 
-export function startGame() {
-  //start game
-  gameCards.push(...cards); // reset gameCards array to original cards array
-  drawPlayerCards();
-  drawCommunityCards();
-}
-
-if (await checkHost(roomId)) {
+export async function startGame(){
+if (await checkHost(roomId)) {    // createt seat positions and assign cards to players in the database, then return success message or error if something goes wrong
   const { data, error } = await supabase.functions.invoke('setup-room', {
     body: { roomId: roomId }
   });
@@ -44,4 +38,8 @@ if (await checkHost(roomId)) {
   if (error) {
     console.error('Fehler:', error);
   }
+  console.log('Antwort:', data);
 }
+gameCards.push(...cards); // reset gameCards array to original cards array to ensure a fresh deck for each game
+}
+
