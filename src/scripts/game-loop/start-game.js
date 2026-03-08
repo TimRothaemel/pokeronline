@@ -15,22 +15,8 @@ console.log(player); // log player data to console for debugging
 
 export let flop1, flop2, flop3, turn, river; // export community cards for game-sequence.js
 
-function drawPlayerCards() {
-  player.cards.unshift(getRandomCard()); //random cards for player
-  player.cards.unshift(getRandomCard());
-}
-
-function drawCommunityCards() {
-  //random cards for community
-  flop1 = getRandomCard();
-  flop2 = getRandomCard();
-  flop3 = getRandomCard();
-  turn = getRandomCard();
-  river = getRandomCard();
-}
-
 export async function startGame(){
-if (await checkHost(roomId)) {    // createt seat positions and assign cards to players in the database, then return success message or error if something goes wrong
+if (await checkHost(roomId)) {    // createt seat positions
   const { data, error } = await supabase.functions.invoke('setup-room', {
     body: { roomId: roomId }
   });

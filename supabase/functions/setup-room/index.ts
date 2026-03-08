@@ -1,4 +1,5 @@
-import { createClient } from "jsr:@supabase/supabase-js";// import createClient function from supabase-js library to create a supabase client instance
+import { createClient } from "jsr:@supabase/supabase-js@2";// import createClient function from supabase-js library to create a supabase client instance
+import { drawCards } from "../_shared/random-cards.ts"; // import draw function from random-cards.js to draw random cards for players and community
 
 const corsHeaders = { // CORS headers to allow cross-origin requests
   "Access-Control-Allow-Origin": "*", // allow requests from any origin
@@ -43,6 +44,7 @@ async function generateSeatPositions(roomId: string): Promise<void> { // functio
     console.log(`Spieler ${players[i].id} erhält Sitzplatz ${seats[i]}`);
   }
 }
+drawCards(roomId, userId); // Call the drawCards function to initialize the game cards for the players and community
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {

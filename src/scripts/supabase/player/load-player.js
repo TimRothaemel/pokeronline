@@ -1,4 +1,4 @@
-import supabase from "../initialize-supabase";
+import supabase from "../initialize-supabase.js"; // import supabase client instance for database interactions
 
 export async function loadPlayers(roomId) {
   const { data } = await supabase
