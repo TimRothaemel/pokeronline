@@ -1,5 +1,4 @@
 import {
-  player,
   flop1,
   flop2,
   flop3,

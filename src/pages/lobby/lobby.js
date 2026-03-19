@@ -4,8 +4,6 @@ import { addBot } from "../../scripts/supabase/bot/add-bot.js"; //import { addBo
 import { startGame } from "../../scripts/game-loop/start-game.js"; //import { startGame } from "../../scripts/supabase/game/start-game.js";
 
 const roomId = localStorage.getItem("room_id");
-const addBotBtn = document.getElementById("add-bot-btn");
-const startGameBtn = document.getElementById("start-game-btn");
 
 if (!roomId) {
   // No room ID found, redirect to homepage
@@ -25,21 +23,30 @@ async function initLobby() {
   } else {
     document.getElementById("add-bot-btn").disabled = true;
   }
-  if (players.length >=6) {
+  if (players.length >= 6) {
     console.warn("Maximale Spieleranzahl erreicht. Kein weiterer Bot kann hinzugefügt werden.");
   }
 }
 
-addBotBtn.addEventListener("click", async () => {
-  // Add bot to game and refresh lobby
-  await addBot(roomId);
-  initLobby();// Refresh lobby after adding bot to show updated player list and button states
-});
+document.addEventListener("DOMContentLoaded", () => {
+  const addBotBtn = document.getElementById("add-bot-btn");
+  const startGameBtn = document.getElementById("start-game-btn");
 
-if (startGameBtn) {// Check if startGameBtn exists before adding event listener to avoid errors
+  if (addBotBtn) {
+    addBotBtn.addEventListener("click", async () => {
+      await addBot(roomId);
+      initLobby();
+    });
+  }
+
+if (startGameBtn) {
   startGameBtn.addEventListener("click", async () => {
-    await startGame();
-    window.location.href = "../game/game.html"; // Redirect to game page after starting the game
+  await startGame();
+    window.location.href = "../game/game.html";
   });
 }
-initLobby(); // Start lobby initialization on page load
+
+  initLobby(); // run after DOM is ready
+});
+
+

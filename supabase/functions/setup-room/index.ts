@@ -22,7 +22,7 @@ async function loadPlayers(roomId: string) {
   return data;
 }
 
-async function generateSeatPositions(roomId: string): Promise<void> {
+async function generateSeatPositions(roomId: string): Promise<any[]> {
   const players = await loadPlayers(roomId);
   const seats = Array.from({ length: players.length }, (_, i) => i);
   for (let i = seats.length - 1; i > 0; i--) {
@@ -36,6 +36,7 @@ async function generateSeatPositions(roomId: string): Promise<void> {
       .eq("id", players[i].id);
     if (error) console.error(`Fehler bei Spieler ${players[i].id}:`, error);
   }
+  return players;
 }
 
 Deno.serve(async (req: Request) => {
@@ -43,7 +44,7 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const { roomId, userId } = await req.json(); 
+  const { roomId, userId } = await req.json();
   if (!roomId || !userId) {
     return new Response(
       JSON.stringify({ error: "roomId and userId are required" }),
@@ -56,6 +57,22 @@ Deno.serve(async (req: Request) => {
 
   await generateSeatPositions(roomId);
   await drawCards(roomId);
+
+  const { data: currentPlayer, error } = await supabase
+    .from("players")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    return new Response(
+      JSON.stringify({ error: "Spieler nicht gefunden" }),
+      {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
 
   return new Response(
     JSON.stringify({
