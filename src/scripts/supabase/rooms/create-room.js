@@ -15,6 +15,7 @@ export async function createRoom(roomName, password, nickname) {
         name: roomName,
         password_hash: passwordHash,
         host_player_id: playerId,
+        min_blind: 50, 
       },
     ])
     .select()
