@@ -7,7 +7,7 @@ import {
 } from "../display/display-cards.js";
 import { updateCoins } from "../display/display-coins.js";
 
-//revealPlayerCards();
+revealPlayerCards();
 //revealFlops();
 //revealTurn();
 //revealRiver();

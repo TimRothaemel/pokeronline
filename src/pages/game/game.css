@@ -245,3 +245,20 @@ p {
     font-size: 0.75rem;
   }
 }
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 9px;
+  display: block;
+}
+#flop1.has-card,
+#flop2.has-card,
+#flop3.has-card,
+#turn.has-card,
+#river.has-card,
+#playercard1.has-card,
+#playercard2.has-card {
+  background: #fdf6e3;
+  color: #1a1a1a;
+}
