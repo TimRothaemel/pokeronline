@@ -11,6 +11,6 @@ revealPlayerCards();
 //revealFlops();
 //revealTurn();
 //revealRiver();
-//updateCoins();
+updateCoins();
 
 
