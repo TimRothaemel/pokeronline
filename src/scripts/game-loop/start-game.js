@@ -15,7 +15,6 @@ export async function startGame() {
     const { error } = await supabase.functions.invoke('setup-room', {
       body: { roomId: roomId, userId: getPlayerId() }
     });
-
     if (error) {
       console.error('Fehler beim Setup:', error);
       return null;
