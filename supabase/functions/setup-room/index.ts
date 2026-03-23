@@ -1,5 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { drawCards } from "../_shared/random-cards.ts";
+import { drawCards } from "../_shared/cards/random-cards.ts";
+import { loadPlayers } from "../_shared/player/load-player.ts"; 
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,32 +13,6 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
-
-async function loadPlayers(roomId: string) {
-  const { data, error } = await supabase
-    .from("players")
-    .select("*")
-    .eq("room_id", roomId);
-  if (error) throw error;
-  return data;
-}
-
-async function generateSeatPositions(roomId: string): Promise<any[]> {
-  const players = await loadPlayers(roomId);
-  const seats = Array.from({ length: players.length }, (_, i) => i);
-  for (let i = seats.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [seats[i], seats[j]] = [seats[j], seats[i]];
-  }
-  for (let i = 0; i < players.length; i++) {
-    const { error } = await supabase
-      .from("players")
-      .update({ seat_position: seats[i] })
-      .eq("id", players[i].id);
-    if (error) console.error(`Fehler bei Spieler ${players[i].id}:`, error);
-  }
-  return players;
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
