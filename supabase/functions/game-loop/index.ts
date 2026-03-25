@@ -22,7 +22,7 @@ Deno.serve(async (req: Request) => {
     );
   }
     let firstPlayer = await getFirstPlayer(roomId)
-    await notifyPlayer(roomId, firstPlayer.id, "small_blind", 25);
+    await notifyPlayer(roomId, firstPlayer.id, "small_blind", 25, message);
 
   if (error) {// throw error response
     return new Response(

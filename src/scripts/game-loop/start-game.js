@@ -1,8 +1,7 @@
 import { checkHost } from "../supabase/player/check-host.js";
-import { loadPlayers } from "../supabase/player/load-player.js";
 import { getPlayerId } from "../supabase/player/get-player-id.js";
 import supabase from "../supabase/initialize-supabase.js"; // import supabase client
-
+import { displayMassage } from "../display/display-message.js";
 
 const roomId = localStorage.getItem("room_id"); // get room_id from localStorage for later use
 
@@ -32,5 +31,6 @@ export async function startGame() {
     console.error("Spieler nicht gefunden:", error);
     return null;
   }
+  displayMassage("Das Spiel hat gestartet")
 return player;
 }

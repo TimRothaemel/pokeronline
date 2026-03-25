@@ -9,6 +9,7 @@ import { placeBet } from "../actions/bet.js";
 import { startGame } from "./start-game.js";
 import { checkHost } from "../supabase/player/check-host.js";
 import { startGameLoop } from "./start-game-loop.js";
+import { displayMassage } from "../display/display-message.js";
 
 const roomId = localStorage.getItem("room_id")
 const gameStarted = localStorage.getItem("game_started") === "true";//save step 

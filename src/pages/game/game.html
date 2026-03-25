@@ -14,7 +14,10 @@
       async
       src="/src/scripts/game-loop/game-sequence.js"
     ></script>
-    <script type="module" src="/src/scripts/supabase/initialize-supabase.js"></script>
+    <script
+      type="module"
+      src="/src/scripts/supabase/initialize-supabase.js"
+    ></script>
   </head>
   <body>
     <h1>pokeronline</h1>
@@ -35,9 +38,10 @@
           <div class="card" id="playercard1"></div>
           <div class="card" id="playercard2"></div>
         </div>
+        <div class="message" id="message-container"></div>
+
         <p>Chips: <span class="chip" id="player-coins"></span></p>
       </div>
-
       <div id="actions" class="table">
         <button id="btn_checken">Bet</button>
         <button id="btn_mitgehen">Gehen</button>

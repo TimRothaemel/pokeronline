@@ -262,3 +262,8 @@ p {
   background: #fdf6e3;
   color: #1a1a1a;
 }
+.message{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
