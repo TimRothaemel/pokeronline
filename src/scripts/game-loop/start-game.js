@@ -16,7 +16,7 @@ export async function startGame() {
       body: { roomId: roomId, userId: getPlayerId() }
     });
     if (error) {
-      console.error('Fehler beim Setup:', error);
+      console.error('setuperror:', error);
       return null;
     }
   }

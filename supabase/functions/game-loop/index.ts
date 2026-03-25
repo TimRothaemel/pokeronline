@@ -11,10 +11,10 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const { roomId, playerId} = await req.json();
-  if (!roomId || !playerId) {
+  const { roomId} = await req.json();
+  if (!roomId) {
     return new Response(
-      JSON.stringify({ error: "roomId, playerId and message are required" }),
+      JSON.stringify({ error: "roomId is required" }),
       {
         status: 400,
         headers: { "Content-Type": "application/json" },

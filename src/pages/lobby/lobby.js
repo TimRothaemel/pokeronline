@@ -1,7 +1,6 @@
 import { loadPlayers } from "../../scripts/supabase/player/load-player.js"; //import { loadPlayers } from "../../scripts/supabase/player/load-player.js";
 import { displayPlayers } from "../../components/player-list/player-list.js"; //import { displayPlayers } from "../../components/player-list/player-list.js";
 import { addBot } from "../../scripts/supabase/bot/add-bot.js"; //import { addBot } from "../../scripts/supabase/bot/add-bot.js";
-import { startGame } from "../../scripts/game-loop/start-game.js"; //import { startGame } from "../../scripts/supabase/game/start-game.js";
 
 const roomId = localStorage.getItem("room_id");
 
@@ -41,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 if (startGameBtn) {
   startGameBtn.addEventListener("click", async () => {
-  await startGame();
     window.location.href = "../game/game.html";
   });
 }
