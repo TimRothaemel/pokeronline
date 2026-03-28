@@ -1,22 +1,35 @@
 import { checkHost } from "../supabase/player/check-host.js";
 import { getPlayerId } from "../supabase/player/get-player-id.js";
-import supabase from "../supabase/initialize-supabase.js"; // import supabase client
+import supabase from "../supabase/initialize-supabase.js";
 import { displayMassage } from "../display/display-message.js";
-
-const roomId = localStorage.getItem("room_id"); // get room_id from localStorage for later use
+import { setGameState } from "./gamestate.js";
 
 export let playerCards = []
 
-export let flop1, flop2, flop3, turn, river; // export community cards for game-sequence.js
+export let flop1, flop2, flop3, turn, river;
 
 export async function startGame() {
+  const roomId = localStorage.getItem("room_id"); 
+  
+  if (!roomId) {
+    console.error("room_id missing from localStorage")
+    return null
+  }
+
   if (await checkHost(roomId)) {
-    const { error } = await supabase.functions.invoke('setup-room', {
-      body: { roomId: roomId, userId: getPlayerId() }
-    });
+    const { error } = await supabase.functions.invoke("setup-room", {
+      body: { roomId, userId: getPlayerId() },
+    })
+
     if (error) {
-      console.error('setuperror:', error);
-      return null;
+      console.error("setup-room error:", error)
+      return null
+    }
+
+    const state = await setGameState(roomId, "started")
+    if (!state) {
+      console.error("Failed to set game state")
+      return null
     }
   }
 
@@ -26,11 +39,11 @@ export async function startGame() {
     .eq("id", getPlayerId())
     .single();
 
-    localStorage.setItem("current_player", JSON.stringify(player)); // save current player data to localStorage for use in game page
   if (error) {
     console.error("Spieler nicht gefunden:", error);
     return null;
   }
-  displayMassage("Das Spiel hat gestartet")
-return player;
+
+  localStorage.setItem("current_player", JSON.stringify(player));
+  return player;
 }

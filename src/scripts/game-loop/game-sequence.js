@@ -9,16 +9,15 @@ import { placeBet } from "../actions/bet.js";
 import { startGame } from "./start-game.js";
 import { checkHost } from "../supabase/player/check-host.js";
 import { startGameLoop } from "./start-game-loop.js";
-import { displayMassage } from "../display/display-message.js";
+import { getGameState } from "./gamestate.js";
 
 const roomId = localStorage.getItem("room_id")
-const gameStarted = localStorage.getItem("game_started") === "true";//save step 
+let gameState = await getGameState(roomId)
+console.log(gameState) 
 
-if(!gameStarted && await checkHost(roomId)){// if the user is host and startGame have not run jet
+if( await checkHost(roomId) && gameState === "waiting"){// if the user is host and startGame have not run jet
   console.log("The player is the host.")
   await startGame()
-  await startGameLoop(roomId)
-  localStorage.setItem("game_started", "true");
 }
 
 updateCoins();

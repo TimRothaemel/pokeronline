@@ -7,7 +7,7 @@ import {
 } from "../game-loop/start-game.js";
 
 let player = JSON.parse(localStorage.getItem("current_player")); // get current player data from localStorage for use in display functions
-let playerCards = JSON.parse(player[0].cards) 
+let playerCards = JSON.parse(player.cards) 
 
 export function revealCard(id, src) {
   let el = document.getElementById(id);
