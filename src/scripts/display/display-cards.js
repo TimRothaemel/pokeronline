@@ -6,9 +6,6 @@ import {
   turn,
 } from "../game-loop/start-game.js";
 
-let player = JSON.parse(localStorage.getItem("current_player")); // get current player data from localStorage for use in display functions
-let playerCards = JSON.parse(player.cards) 
-
 export function revealCard(id, src) {
   let el = document.getElementById(id);
   el.innerHTML = `<img src="${src}" alt="card">`;
@@ -23,8 +20,31 @@ let communityCard3 = "flop3";
 let communityCard4 = "turn";
 let communityCard5 = "river";
 
+function getCurrentPlayerCards() {
+  const playerJson = localStorage.getItem("current_player");
+
+  if (!playerJson) {
+    console.error("current_player missing from localStorage");
+    return null;
+  }
+
+  const player = JSON.parse(playerJson);
+
+  if (!player.cards) {
+    console.error("current_player has no cards", player);
+    return null;
+  }
+
+  return JSON.parse(player.cards);
+}
+
 export function revealPlayerCards() {
-  //reveal player cards
+  const playerCards = getCurrentPlayerCards();
+
+  if (!playerCards || playerCards.length < 2) {
+    return;
+  }
+
   revealCard(
     playerCard1,
     `/src/assets/cards/${playerCards[0].color}/${playerCards[0].number}.png`,

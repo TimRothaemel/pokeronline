@@ -13,15 +13,21 @@ import { getGameState } from "./gamestate.js";
 
 const roomId = localStorage.getItem("room_id")
 let gameState = await getGameState(roomId)
-console.log(gameState) 
+let currentPlayer = null;
 
 if( await checkHost(roomId) && gameState === "waiting"){// if the user is host and startGame have not run jet
   console.log("The player is the host.")
-  await startGame()
+  currentPlayer = await startGame();
 }
 
-updateCoins();
-revealPlayerCards();
+if (!currentPlayer) {
+  currentPlayer = JSON.parse(localStorage.getItem("current_player"));
+}
+
+if (currentPlayer) {
+  updateCoins();
+  revealPlayerCards();
+}
 
 
 let betBtn = document.getElementById("btn_checken"); // get reference to bet button
