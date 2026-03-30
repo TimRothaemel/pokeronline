@@ -1,46 +1,78 @@
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { loadPlayers } from "../_shared/player/load-player.ts";
 import { notifyPlayer } from "../_shared/player/notify-player.ts";
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+type Player = {
+  id: string;
+  seat_position: number | null;
+};
+
+async function getFirstPlayer(roomId: string): Promise<Player> {
+  const players = await loadPlayers(roomId) as Player[];
+
+  if (!players.length) {
+    throw new Error("No players found for room");
+  }
+
+  const sortedPlayers = [...players].sort((a, b) => {
+    const seatA = a.seat_position ?? Number.MAX_SAFE_INTEGER;
+    const seatB = b.seat_position ?? Number.MAX_SAFE_INTEGER;
+    return seatA - seatB;
+  });
+
+  return sortedPlayers[0];
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const { roomId} = await req.json();
-  if (!roomId) {
+  try {
+    const { roomId } = await req.json();
+
+    if (!roomId) {
+      return new Response(
+        JSON.stringify({ error: "roomId is required" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    const firstPlayer = await getFirstPlayer(roomId);
+
+    await notifyPlayer(roomId, firstPlayer.id, "small_blind", 25);
+
     return new Response(
-      JSON.stringify({ error: "roomId is required" }),
+      JSON.stringify({
+        success: true,
+        message: "Game loop executed successfully",
+        firstPlayerId: firstPlayer.id,
+      }),
       {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
-  }
-    let firstPlayer = await getFirstPlayer(roomId)
-    await notifyPlayer(roomId, firstPlayer.id, "small_blind", 25, message);
+  } catch (error) {
+    console.error("Game loop failed", error);
 
-  if (error) {// throw error response
+    const message = error instanceof Error ? error.message : "Game loop failed";
+
     return new Response(
-      JSON.stringify({ error: "Game loop failed" }),
+      JSON.stringify({ error: message }),
       {
-        status: 404,
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
   }
-  return new Response(// throw success response
-    JSON.stringify({
-      success: true,
-      message: "Game loop executed successfully",
-    }),
-    {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    },
-  );
 });
