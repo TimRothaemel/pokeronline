@@ -1,6 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { drawCards } from "../_shared/cards/random-cards.ts";
-import { loadPlayers } from "../_shared/player/load-player.ts"; 
+import { generateSeatPositions } from "../_shared/player/generate-seatpostition.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
   await generateSeatPositions(roomId);
   await drawCards(roomId);
 
-  const { data: currentPlayer, error } = await supabase
+  const { error } = await supabase
     .from("players")
     .select("*")
     .eq("id", userId)
