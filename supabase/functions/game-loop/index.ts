@@ -1,5 +1,6 @@
 import { loadPlayers } from "../_shared/player/load-player.ts";
 import { notifyPlayer } from "../_shared/player/notify-player.ts";
+import { getPlayerWithSeat } from "../_shared/player/get-player-with-seat.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,22 +14,6 @@ type Player = {
   seat_position: number | null;
 };
 
-async function getFirstPlayer(roomId: string): Promise<Player> {
-  const players = await loadPlayers(roomId) as Player[];
-
-  if (!players.length) {
-    throw new Error("No players found for room");
-  }
-
-  const sortedPlayers = [...players].sort((a, b) => {
-    const seatA = a.seat_position ?? Number.MAX_SAFE_INTEGER;
-    const seatB = b.seat_position ?? Number.MAX_SAFE_INTEGER;
-    return seatA - seatB;
-  });
-
-  return sortedPlayers[0];
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -38,16 +23,13 @@ Deno.serve(async (req: Request) => {
     const { roomId } = await req.json();
 
     if (!roomId) {
-      return new Response(
-        JSON.stringify({ error: "roomId is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      return new Response(JSON.stringify({ error: "roomId is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const firstPlayer = await getFirstPlayer(roomId);
+    const firstPlayer = await getPlayerWithSeat(roomId, 0);    
 
     await notifyPlayer(roomId, firstPlayer.id, "small_blind", 25);
 
@@ -67,12 +49,9 @@ Deno.serve(async (req: Request) => {
 
     const message = error instanceof Error ? error.message : "Game loop failed";
 
-    return new Response(
-      JSON.stringify({ error: message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
