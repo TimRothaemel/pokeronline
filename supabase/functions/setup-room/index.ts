@@ -32,7 +32,6 @@ Deno.serve(async (req: Request) => {
 
   await generateSeatPositions(roomId);
   await drawCards(roomId);
-
   const { error } = await supabase
     .from("players")
     .select("*")

@@ -29,7 +29,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const firstPlayer = await getPlayerWithSeat(roomId, 0);    
+    let firstPlayer = await getPlayerWithSeat(roomId, 0);    
 
     await notifyPlayer(roomId, firstPlayer.id, "small_blind", 25);
 

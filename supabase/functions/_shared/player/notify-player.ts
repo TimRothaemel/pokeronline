@@ -11,6 +11,9 @@ export async function notifyPlayer(
   actionType: string,
   amount: number,
 ) {
+  console.log(
+    `Notifying player ${playerId} in room ${roomId} about action ${actionType} with amount ${amount}`,
+  );
   const { data, error } = await supabase.from("actions").insert({
     room_id: roomId,
     player_id: playerId,

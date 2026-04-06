@@ -24,7 +24,7 @@ let currentPlayer = JSON.parse(localStorage.getItem("current_player") ?? "null")
   });
 
 
-if ((await checkHost(roomId)) && gameState !== "waiting") {
+if ((await checkHost(roomId)) && gameState === "waiting") {
   // if the user is host and startGame have not run jet
   console.log("The player is the host.");
   currentPlayer = await startGame();
