@@ -29,6 +29,6 @@ export async function joinRoom(roomName, password, nickname) {
       room_id: room.id
     }
   ]);
-
+  localStorage.setItem("room_id", room.id); // store room_id in localStorage for later use
   console.log("Raum beigetreten");
 }
