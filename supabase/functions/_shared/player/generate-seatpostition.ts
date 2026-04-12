@@ -1,3 +1,11 @@
+import { createClient } from "jsr:@supabase/supabase-js@2";
+import { loadPlayers } from "./load-player.ts";
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
+
 export async function generateSeatPositions(roomId: string): Promise<any[]> {
   const players = await loadPlayers(roomId);
 

@@ -12,5 +12,5 @@ export async function getRoom(roomId) {
     return null;
   }
 
-  return room;
+  return room ?? null;
 }

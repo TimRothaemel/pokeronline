@@ -4,12 +4,13 @@ export async function updateChips(playerId, newChipCount) {
   const { data, error } = await supabase
     .from("players")
     .update({ chips: newChipCount })
+    .select("*")
     .eq("id", playerId);
 
   if (error) {
     console.error("Error updating chips:", error);
-    return null;
+    return { data: null, error };
   }
 
-  return data;
+  return { data, error: null };
 }

@@ -4,16 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pokeronline</title>
+    <link rel="stylesheet" href="/main.css" />
   </head>
   <body>
     <main>
-      <div class="menu-wrapper">
-        <div class="menu-items">
-          <a href="/src/pages/room/create-room.html" class="menu-item" id="create-room">Erstelle neuen Raum</a>
-          
-          <a href="/src/pages/room/join-room.html" class="menu-item" id="join-room">Trete einen Raum bei</a>
+      <section class="hero-card">
+        <div class="hero-layout">
+          <div>
+            <span class="eyebrow">Multiplayer Poker</span>
+            <h1 class="page-title">Build a table. Fill the seats. Play the hand.</h1>
+            <p class="page-copy">
+              Create a private room, invite another player or add bots, and run a
+              full Texas Hold'em round directly in the browser.
+            </p>
+            <div class="hero-actions">
+              <a href="/src/pages/room/create-room.html" class="menu-item" id="create-room">Create Room</a>
+              <a href="/src/pages/room/join-room.html" class="secondary-action" id="join-room">Join Room</a>
+            </div>
+          </div>
+          <div class="menu-visual" aria-hidden="true">
+            <div class="preview-card">A</div>
+            <div class="preview-card is-dark">K</div>
+            <div class="preview-card">Q</div>
+          </div>
         </div>
-      </div>
+      </section>
     </main>
   </body>
 </html>

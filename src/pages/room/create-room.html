@@ -4,13 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Raum erstellen</title>
-
+    <link rel="stylesheet" href="/main.css" />
     <script type="module" src="/src/pages/room/create-room.js"></script>
   </head>
   <body>
     <main>
-      <div class="setup-room">
-        <div class="input-erea">
+      <div class="page-shell">
+        <div class="page-header">
+          <a class="back-link" href="/">Zur Startseite</a>
+          <span class="eyebrow">Host Table</span>
+          <h1 class="page-title">Create a poker room</h1>
+          <p class="page-subtitle">
+            Choose your player name, define the room and keep the password private.
+          </p>
+        </div>
+        <div class="setup-room">
+          <div class="input-erea">
           <div class="personal-data">
             <label for="name">Name:</label>
             <input type="text" name="name" id="user-name" />
@@ -22,6 +31,7 @@
             <input type="password" name="room-password" id="room-password" />
             <input type="submit" value="Fertig">
           </div>
+        </div>
         </div>
       </div>
     </main>

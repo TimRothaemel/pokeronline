@@ -19,43 +19,53 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const { roomId, userId } = await req.json();
-  if (!roomId || !userId) {
+  try {
+    const { roomId, userId } = await req.json();
+    if (!roomId || !userId) {
+      return new Response(
+        JSON.stringify({ error: "roomId and userId are required" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    await generateSeatPositions(roomId);
+    await drawCards(roomId);
+    const { error } = await supabase
+      .from("players")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      return new Response(
+        JSON.stringify({ error: "Spieler nicht gefunden" }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: "roomId and userId are required" }),
+      JSON.stringify({
+        success: true,
+        message: "Room setup completed successfully",
+      }),
       {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
-  }
+  } catch (error) {
+    console.error("setup-room failed", error);
+    const message = error instanceof Error ? error.message : "setup-room failed";
 
-  await generateSeatPositions(roomId);
-  await drawCards(roomId);
-  const { error } = await supabase
-    .from("players")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  if (error) {
-    return new Response(
-      JSON.stringify({ error: "Spieler nicht gefunden" }),
-      {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
-  }
-
-  return new Response(
-    JSON.stringify({
-      success: true,
-      message: "Room setup completed successfully",
-    }),
-    {
-      status: 200,
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    },
-  );
+    });
+  }
 });

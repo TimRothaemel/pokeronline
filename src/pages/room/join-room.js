@@ -1,13 +1,23 @@
-import { joinRoom } from "../../scripts/supabase/rooms/join-rooms";
+import { joinRoom } from "../../scripts/supabase/rooms/join-rooms.js";
 document
   .querySelector("[type=submit]")
   .addEventListener("click", async (event) => {
     event.preventDefault();
 
-    const roomName = document.getElementById("room-name").value;
+    const roomName = document.getElementById("room-name").value.trim();
     const password = document.getElementById("room-password").value;
-    const nickname = document.getElementById("user-name").value;
+    const nickname = document.getElementById("user-name").value.trim();
 
-    await joinRoom(roomName, password, nickname);
+    if (!roomName || !password || !nickname) {
+      alert("Bitte fülle alle Felder aus.");
+      return;
+    }
+
+    const result = await joinRoom(roomName, password, nickname);
+    if (!result?.ok) {
+      alert(result?.message ?? "Raum konnte nicht betreten werden.");
+      return;
+    }
+
     window.location.href = "/src/pages/lobby/lobby.html";
   });

@@ -1,45 +1,30 @@
-import { getPlayerId } from "../player/get-player-id.js"; // import getPlayerId() function
-import { hashPassword } from "../../general/password-hash.js"; // import hashPassword() function
 import supabase from "../initialize-supabase.js"; //import supabase client instance
 import { generateNewPlayerId } from "../player/new-player-id.js";
 
 export async function createRoom(roomName, password, nickname) {
   const playerId = await generateNewPlayerId();
+  const { data, error } = await supabase.functions.invoke("room-access", {
+    body: {
+      mode: "create",
+      roomName,
+      password,
+      nickname,
+      playerId,
+    },
+  });
 
-  const passwordHash = await hashPassword(password);
-
-  const { data: room, error } = await supabase
-    .from("rooms")
-    .insert([
-      {
-        name: roomName,
-        password_hash: passwordHash,
-        host_player_id: playerId,
-        min_blind: 50, 
-      },
-    ])
-    .select()
-    .single();
-
-if (error) {
-    if (error.code === "23505") {
-      alert("Dieser Raumname existiert bereits.");
-    } else {
-      alert(error.message);
-    }
-    return error; 
+  if (error) {
+    console.error("Error creating room:", error);
+    return { ok: false, message: error.message };
   }
 
-  await supabase.from("players").insert([
-    // insert new player into "players" table
-    {
-      id: playerId,
-      nickname: nickname,
-      room_id: room.id,
-      host: true,// set host to true for the player who created the room
-    },
-  ]);
-  localStorage.setItem("room_id", room.id); // store room_id in localStorage for later use
-  console.log("Room ID:", room.id);
-  console.log("Raum erstellt:", room);
+  if (!data?.ok) {
+    return { ok: false, message: data?.message ?? "Raum konnte nicht erstellt werden." };
+  }
+
+  localStorage.setItem("room_id", data.room.id);
+  localStorage.removeItem("current_room");
+  localStorage.removeItem("current_player");
+
+  return { ok: true, room: data.room };
 }

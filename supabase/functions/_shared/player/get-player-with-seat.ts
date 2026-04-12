@@ -1,7 +1,12 @@
+type PlayerWithSeat = {
+  id: string;
+  seat_position: number | null;
+};
+
 export async function getPlayerWithSeat(
   roomId: string,
   seat: number,
-): Promise<Player> {
+): Promise<PlayerWithSeat> {
   const { createClient } = await import("jsr:@supabase/supabase-js@2");
 
   const supabase = createClient(

@@ -1,15 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raum beitreten</title>
+    <link rel="stylesheet" href="/main.css" />
     <script type="module" src="/src/pages/room/join-room.js" defer></script>
 </head>
 <body>
      <main>
-      <div class="setup-room">
-        <div class="input-erea">
+      <div class="page-shell">
+        <div class="page-header">
+          <a class="back-link" href="/">Zur Startseite</a>
+          <span class="eyebrow">Join Table</span>
+          <h1 class="page-title">Enter an existing room</h1>
+          <p class="page-subtitle">
+            Use the room name and password from the host to sit down at the table.
+          </p>
+        </div>
+        <div class="setup-room">
+          <div class="input-erea">
           <div class="personal-data">
             <label for="name">Name:</label>
             <input type="text" name="name" id="user-name" />
@@ -21,6 +31,7 @@
             <input type="password" name="room-password" id="room-password" />
             <input type="submit" value="Fertig">
           </div>
+        </div>
         </div>
       </div>
     </main>

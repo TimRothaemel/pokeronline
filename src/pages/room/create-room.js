@@ -2,19 +2,25 @@ import { createRoom } from "../../scripts/supabase/rooms/create-room.js";// impo
 
 const submitBtn = document.querySelector('input[type="submit"]');
 
-submitBtn.addEventListener("click", async () => {
-  const userName = document.getElementById("user-name").value;
-  const roomName = document.getElementById("room-name").value;
+submitBtn.addEventListener("click", async (event) => {
+  event.preventDefault();
+
+  const userName = document.getElementById("user-name").value.trim();
+  const roomName = document.getElementById("room-name").value.trim();
   const roomPassword = document.getElementById("room-password").value;
 
   if (!userName || !roomName || !roomPassword) {
-    console.warn("Please fill in all fields.");
+    alert("Bitte fülle alle Felder aus.");
     return;
   }
 
-  console.log(userName, roomName, roomPassword);// Log input values for debugging
-  const error = await createRoom(roomName, roomPassword, userName); // Call createRoom function with user input
-  if(!error) {
+  const result = await createRoom(roomName, roomPassword, userName);
+  if (!result?.ok) {
+    alert(result?.message ?? "Raum konnte nicht erstellt werden.");
+    return;
+  }
+
+  if (result.ok) {
     window.location.href = "/src/pages/lobby/lobby.html"; // Redirect to lobby page if room creation is successful
   }
 });
