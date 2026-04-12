@@ -1,11 +1,13 @@
-import supabase from "../supabase/initialize-supabase";
+import supabase from "../supabase/initialize-supabase.js";
+
+export const WAITING_STATUS = "waiting";
 
 export async function getGameState(roomId) {
   const { data, error } = await supabase
     .from("rooms")
     .select("status")
     .eq("id", roomId)
-    .single()
+    .single();
 
   if (error) {
     console.error("Error fetching gameState", error);
@@ -17,8 +19,33 @@ export async function getGameState(roomId) {
     return null;
   }
 
-  return data.status
+  return data.status;
 }
+
+export function parseGameState(status) {
+  if (!status || status === WAITING_STATUS) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(status);
+  } catch {
+    return null;
+  }
+}
+
+export function getVisibleCommunityCardCount(gameState) {
+  if (!gameState) {
+    return 0;
+  }
+
+  return gameState.revealedCount ?? 0;
+}
+
+export function isPlayersTurn(gameState, playerId) {
+  return Boolean(gameState && playerId && gameState.currentPlayerId === playerId);
+}
+
 export async function setGameState(roomId, gameState) {
   if (!roomId) {
     console.error("setGameState missing roomId");
@@ -29,8 +56,8 @@ export async function setGameState(roomId, gameState) {
     .from("rooms")
     .update({ status: gameState })
     .eq("id", roomId)
-    .select("status") 
-    .single()
+    .select("status")
+    .single();
 
   if (error) {
     console.error("Error setting gameState", error);

@@ -1,24 +1,25 @@
-import {
-  flop1,
-  flop2,
-  flop3,
-  river,
-  turn,
-} from "../game-loop/start-game.js";
-
 export function revealCard(id, src) {
-  let el = document.getElementById(id);
+  const el = document.getElementById(id);
+  if (!el) {
+    return;
+  }
+
   el.innerHTML = `<img src="${src}" alt="card">`;
   el.classList.add("has-card");
 }
 
-let playerCard1 = "playercard1";
-let playerCard2 = "playercard2";
-let communityCard1 = "flop1";
-let communityCard2 = "flop2";
-let communityCard3 = "flop3";
-let communityCard4 = "turn";
-let communityCard5 = "river";
+const PLAYER_CARD_IDS = ["playercard1", "playercard2"];
+const COMMUNITY_CARD_IDS = ["flop1", "flop2", "flop3", "turn", "river"];
+
+export function hideCard(id) {
+  const el = document.getElementById(id);
+  if (!el) {
+    return;
+  }
+
+  el.innerHTML = "–";
+  el.classList.remove("has-card");
+}
 
 function getCurrentPlayerCards() {
   const playerJson = localStorage.getItem("current_player");
@@ -38,6 +39,26 @@ function getCurrentPlayerCards() {
   return JSON.parse(player.cards);
 }
 
+function getCommunityCards() {
+  const roomJson = localStorage.getItem("current_room");
+
+  if (!roomJson) {
+    return [];
+  }
+
+  const room = JSON.parse(roomJson);
+  if (!room.community_cards) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(room.community_cards);
+  } catch (error) {
+    console.error("Fehler beim Parsen von community_cards", error);
+    return [];
+  }
+}
+
 export function revealPlayerCards() {
   const playerCards = getCurrentPlayerCards();
 
@@ -45,27 +66,63 @@ export function revealPlayerCards() {
     return;
   }
 
-  revealCard(
-    playerCard1,
-    `/src/assets/cards/${playerCards[0].color}/${playerCards[0].number}.png`,
-  );
-  revealCard(
-    playerCard2,
-    `/src/assets/cards/${playerCards[1].color}/${playerCards[1].number}.png`,
-  );
+  PLAYER_CARD_IDS.forEach((cardId, index) => {
+    const card = playerCards[index];
+    if (!card) {
+      return;
+    }
+
+    revealCard(cardId, `/src/assets/cards/${card.color}/${card.number}.png`);
+  });
 }
 
 export function revealFlops() {
-  //reveal flops
-  revealCard(communityCard1, `/src/assets/cards/${flop1.name}.png`);
-  revealCard(communityCard2, `/src/assets/cards/${flop2.name}.png`);
-  revealCard(communityCard3, `/src/assets/cards/${flop3.name}.png`);
+  const communityCards = getCommunityCards();
+  communityCards.slice(0, 3).forEach((card, index) => {
+    revealCard(
+      COMMUNITY_CARD_IDS[index],
+      `/src/assets/cards/${card.color}/${card.number}.png`,
+    );
+  });
 }
+
 export function revealTurn() {
-  //reveal turn
-  revealCard(communityCard4, `/src/assets/cards/${turn.name}.png`);
+  const communityCards = getCommunityCards();
+  const turnCard = communityCards[3];
+  if (!turnCard) {
+    return;
+  }
+
+  revealCard("turn", `/src/assets/cards/${turnCard.color}/${turnCard.number}.png`);
 }
+
 export function revealRiver() {
-  //reveal river
-  revealCard(communityCard5, `/src/assets/cards/${river.name}.png`);
+  const communityCards = getCommunityCards();
+  const riverCard = communityCards[4];
+  if (!riverCard) {
+    return;
+  }
+
+  revealCard("river", `/src/assets/cards/${riverCard.color}/${riverCard.number}.png`);
+}
+
+export function revealAllCommunityCards() {
+  revealFlops();
+  revealTurn();
+  revealRiver();
+}
+
+export function revealCommunityCards(count) {
+  const communityCards = getCommunityCards();
+
+  COMMUNITY_CARD_IDS.forEach((cardId, index) => {
+    const card = communityCards[index];
+
+    if (!card || index >= count) {
+      hideCard(cardId);
+      return;
+    }
+
+    revealCard(cardId, `/src/assets/cards/${card.color}/${card.number}.png`);
+  });
 }

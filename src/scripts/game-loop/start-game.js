@@ -1,14 +1,8 @@
 import { checkHost } from "../supabase/player/check-host.js";
 import { getPlayerId } from "../supabase/player/get-player-id.js";
 import supabase from "../supabase/initialize-supabase.js";
-import { getGameState, setGameState } from "./gamestate.js";
+import { getRoom } from "../supabase/rooms/get-room.js";
 
-export let playerCards = []
-
-export let flop1, flop2, flop3, turn, river;
-
-const GAME_STATE_POLL_INTERVAL_MS = 300;
-const GAME_STATE_MAX_POLLS = 30;
 const PLAYER_FETCH_POLL_INTERVAL_MS = 300;
 const PLAYER_FETCH_MAX_POLLS = 20;
 
@@ -28,20 +22,6 @@ function hasCards(player) {
     console.error("Fehler beim Parsen von player.cards", error);
     return false;
   }
-}
-
-async function waitForStartedGame(roomId) {
-  for (let attempt = 0; attempt < GAME_STATE_MAX_POLLS; attempt += 1) {
-    const gameState = await getGameState(roomId);
-
-    if (gameState === "started") {
-      return true;
-    }
-
-    await wait(GAME_STATE_POLL_INTERVAL_MS);
-  }
-
-  return false;
 }
 
 async function loadCurrentPlayerUntilReady(playerId) {
@@ -67,36 +47,43 @@ async function loadCurrentPlayerUntilReady(playerId) {
   return null;
 }
 
-export async function startGame() {
-  const roomId = localStorage.getItem("room_id"); 
-  const playerId = getPlayerId();
-  
-  if (!roomId) {
-    console.error("room_id missing from localStorage")
-    return null
+async function loadRoomUntilReady(roomId) {
+  for (let attempt = 0; attempt < PLAYER_FETCH_MAX_POLLS; attempt += 1) {
+    const room = await getRoom(roomId);
+
+    if (room?.community_cards) {
+      return room;
+    }
+
+    await wait(PLAYER_FETCH_POLL_INTERVAL_MS);
   }
 
-  if (await checkHost(roomId)) {
+  return null;
+}
+
+export async function startGame() {
+  const roomId = localStorage.getItem("room_id");
+  const playerId = getPlayerId();
+
+  if (!roomId) {
+    console.error("room_id missing from localStorage");
+    return null;
+  }
+
+  const isHost = await checkHost(roomId);
+  if (!isHost) {
+    return null;
+  }
+
+  if (isHost) {
     const { error } = await supabase.functions.invoke("setup-room", {
       body: { roomId, userId: playerId },
-    })
+    });
 
     if (error) {
-      console.error("setup-room error:", error)
-      return null
+      console.error("setup-room error:", error);
+      return null;
     }
-
-    const state = await setGameState(roomId, "started")
-    if (!state) {
-      console.error("Failed to set game state")
-      return null
-    }
-  }
-
-  const gameStarted = await waitForStartedGame(roomId);
-  if (!gameStarted) {
-    console.error("Game did not reach 'started' state in time");
-    return null;
   }
 
   const player = await loadCurrentPlayerUntilReady(playerId);
@@ -105,7 +92,13 @@ export async function startGame() {
     return null;
   }
 
+  const room = await loadRoomUntilReady(roomId);
+  if (!room) {
+    console.error("Roomdaten konnten nicht aktuell geladen werden");
+    return null;
+  }
+
+  localStorage.setItem("current_room", JSON.stringify(room));
   localStorage.setItem("current_player", JSON.stringify(player));
-  console.log("[start-game.js] setzt current_player auf:", player)
-  return player;
+  return { room, player };
 }

@@ -1,6 +1,5 @@
-import { loadPlayers } from "../_shared/player/load-player.ts";
-import { notifyPlayer } from "../_shared/player/notify-player.ts";
-import { getPlayerWithSeat } from "../_shared/player/get-player-with-seat.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
+import { serializeRoomGameState, type RoomGameState } from "../_shared/game/room-state.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,10 +8,23 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
+
+const DEFAULT_CHIPS = 1000;
+
 type Player = {
   id: string;
+  chips: number | null;
   seat_position: number | null;
+  is_bot?: boolean | null;
 };
+
+function rotate<T>(items: T[], startIndex: number) {
+  return items.slice(startIndex).concat(items.slice(0, startIndex));
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -29,15 +41,152 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    let firstPlayer = await getPlayerWithSeat(roomId, 0);    
+    const { data: room, error: roomError } = await supabase
+      .from("rooms")
+      .select("id, min_blind")
+      .eq("id", roomId)
+      .single();
 
-    await notifyPlayer(roomId, firstPlayer.id, "small_blind", 25);
+    if (roomError || !room) {
+      return new Response(JSON.stringify({ error: roomError?.message ?? "Room not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: players, error: playersError } = await supabase
+      .from("players")
+      .select("id, chips, seat_position, is_bot")
+      .eq("room_id", roomId);
+
+    if (playersError || !players) {
+      return new Response(JSON.stringify({ error: playersError?.message ?? "Players not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const orderedPlayers = [...players]
+      .filter((player) => player.seat_position !== null)
+      .sort((left, right) => (left.seat_position ?? 0) - (right.seat_position ?? 0)) as Player[];
+
+    if (orderedPlayers.length < 2) {
+      return new Response(JSON.stringify({ error: "At least two players are required" }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    for (const player of orderedPlayers) {
+      if (player.chips === null) {
+        const { error } = await supabase
+          .from("players")
+          .update({ chips: DEFAULT_CHIPS })
+          .eq("id", player.id);
+
+        if (error) {
+          throw error;
+        }
+
+        player.chips = DEFAULT_CHIPS;
+      }
+    }
+
+    const minBlind = room.min_blind ?? 50;
+    const smallBlind = Math.max(25, Math.floor(minBlind / 2));
+    const bigBlind = minBlind;
+    const smallBlindPlayer = orderedPlayers[0];
+    const bigBlindPlayer = orderedPlayers[1];
+    const orderedIds = orderedPlayers.map((player) => player.id);
+    const playerBets = Object.fromEntries(orderedIds.map((id) => [id, 0]));
+
+    const paidSmallBlind = Math.min(smallBlindPlayer.chips ?? 0, smallBlind);
+    const paidBigBlind = Math.min(bigBlindPlayer.chips ?? 0, bigBlind);
+
+    await supabase
+      .from("players")
+      .update({ chips: (smallBlindPlayer.chips ?? 0) - paidSmallBlind })
+      .eq("id", smallBlindPlayer.id);
+
+    await supabase
+      .from("players")
+      .update({ chips: (bigBlindPlayer.chips ?? 0) - paidBigBlind })
+      .eq("id", bigBlindPlayer.id);
+
+    playerBets[smallBlindPlayer.id] = paidSmallBlind;
+    playerBets[bigBlindPlayer.id] = paidBigBlind;
+
+    const allInPlayerIds = orderedPlayers
+      .filter((player) => {
+        if (player.id === smallBlindPlayer.id) {
+          return (player.chips ?? 0) - paidSmallBlind <= 0;
+        }
+
+        if (player.id === bigBlindPlayer.id) {
+          return (player.chips ?? 0) - paidBigBlind <= 0;
+        }
+
+        return (player.chips ?? 0) <= 0;
+      })
+      .map((player) => player.id);
+
+    const pendingPlayerIds = rotate(
+      orderedIds,
+      (orderedIds.indexOf(bigBlindPlayer.id) + 1) % orderedIds.length,
+    ).filter((playerId) => !allInPlayerIds.includes(playerId));
+
+    const state: RoomGameState = {
+      version: 1,
+      phase: "preflop",
+      dealerSeat: orderedPlayers.length - 1,
+      smallBlind,
+      bigBlind,
+      currentBet: paidBigBlind,
+      pot: paidSmallBlind + paidBigBlind,
+      currentPlayerId: pendingPlayerIds[0] ?? null,
+      actingOrder: orderedIds,
+      pendingPlayerIds,
+      foldedPlayerIds: [],
+      allInPlayerIds,
+      playerBets,
+      revealedCount: 0,
+      winnerIds: [],
+      winningHand: null,
+      lastAction: null,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const { error: statusError } = await supabase
+      .from("rooms")
+      .update({ status: serializeRoomGameState(state) })
+      .eq("id", roomId);
+
+    if (statusError) {
+      throw statusError;
+    }
+
+    await supabase.from("actions").insert([
+      {
+        room_id: roomId,
+        player_id: smallBlindPlayer.id,
+        action_type: "small_blind",
+        amount: paidSmallBlind,
+        type: "system",
+      },
+      {
+        room_id: roomId,
+        player_id: bigBlindPlayer.id,
+        action_type: "big_blind",
+        amount: paidBigBlind,
+        type: "system",
+      },
+    ]);
 
     return new Response(
       JSON.stringify({
         success: true,
         message: "Game loop executed successfully",
-        firstPlayerId: firstPlayer.id,
+        currentPlayerId: state.currentPlayerId,
       }),
       {
         status: 200,

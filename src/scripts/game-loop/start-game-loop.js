@@ -1,4 +1,4 @@
-import supabase from "../supabase/initialize-supabase";
+import supabase from "../supabase/initialize-supabase.js";
 
 export async function startGameLoop(roomId) {
   const { error } = await supabase.functions.invoke("game-loop", {

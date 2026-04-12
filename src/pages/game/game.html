@@ -6,12 +6,10 @@
     <link rel="stylesheet" href="./game.css" />
     <script
       type="module"
-      async
       src="/src/scripts/display/display-cards.js"
     ></script>
     <script
       type="module"
-      async
       src="/src/scripts/game-loop/game-sequence.js"
     ></script>
     <script
@@ -23,6 +21,20 @@
     <h1>pokeronline</h1>
     <div id="game-area-wrapper">
       <div class="table">
+        <div class="game-meta">
+          <div class="meta-pill">
+            Phase
+            <span id="phase-label">Waiting</span>
+          </div>
+          <div class="meta-pill">
+            Pot
+            <span id="pot-value">0</span>
+          </div>
+          <div class="meta-pill">
+            Current Bet
+            <span id="current-bet-value">0</span>
+          </div>
+        </div>
         <div class="cards" id="communitycards">
           <div class="card" id="flop1">–</div>
           <div class="card" id="flop2">–</div>
@@ -38,15 +50,25 @@
           <div class="card" id="playercard1"></div>
           <div class="card" id="playercard2"></div>
         </div>
+        <div class="message secondary" id="turn-container"></div>
         <div class="message" id="message-container"></div>
 
         <p>Chips: <span class="chip" id="player-coins"></span></p>
       </div>
       <div id="actions" class="table">
-        <button id="btn_checken">Bet</button>
-        <button id="btn_mitgehen">Gehen</button>
+        <button id="btn_checken">Check</button>
+        <button id="btn_mitgehen">Call</button>
         <button id="btn_erhoehen">Erhöhe</button>
-        <button id="btn_passen">Passe</button>
+        <button id="btn_passen">Fold</button>
+        <button id="btn_neue_runde">Neue Hand</button>
+        <input
+          id="raise-amount"
+          type="number"
+          min="25"
+          step="25"
+          value="25"
+          aria-label="Raise amount"
+        />
       </div>
     </div>
   </body>

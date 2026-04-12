@@ -61,6 +61,35 @@ h2 {
   margin-bottom: 0;
 }
 
+.game-meta {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.meta-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.24);
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+}
+
+.meta-pill span {
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: #fff4cf;
+}
+
 /* --- Karten-Reihe --- */
 .cards {
   display: flex;
@@ -163,6 +192,13 @@ p {
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
+#actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+  filter: grayscale(0.2);
+}
+
 #actions button:hover {
   transform: translateY(-3px);
   filter: brightness(1.12);
@@ -220,6 +256,24 @@ p {
   box-shadow: 0 8px 24px rgba(146, 43, 33, 0.6), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
+#btn_neue_runde {
+  background: linear-gradient(145deg, #4c3d14, #8b6d1f);
+  color: #fdf0c3;
+  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+}
+
+#raise-amount {
+  width: 110px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  background: rgba(8, 28, 14, 0.8);
+  color: #f5e8c0;
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+}
+
 /* --- Responsive --- */
 @media (max-width: 600px) {
   h1 {
@@ -266,4 +320,13 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 28px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.message.secondary {
+  color: rgba(245, 232, 192, 0.75);
+  font-size: 0.92rem;
+  margin-top: 16px;
 }

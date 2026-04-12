@@ -1,14 +1,12 @@
 import supabase from "../initialize-supabase.js";
 
-export function subscribeToRoom(roomId, playerId, onPayload) {
-  if (!roomId || !playerId) {
-    console.error("subscribeToRoom missing roomId or playerId", {
-      roomId,
-      playerId,
-    });
+export function subscribeToGame(roomId, handlers = {}) {
+  if (!roomId) {
+    console.error("subscribeToGame missing roomId", { roomId });
     return null;
   }
 
+  const { onRoomUpdate, onAction } = handlers;
   let resolveReady;
   let rejectReady;
   let readySettled = false;
@@ -28,43 +26,32 @@ export function subscribeToRoom(roomId, playerId, onPayload) {
   };
 
   const channel = supabase
-    .channel("room-" + roomId + "-" + playerId)
+    .channel("game-" + roomId)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "rooms",
+        filter: `id=eq.${roomId}`,
+      },
+      (payload) => {
+        onRoomUpdate?.(payload);
+      },
+    )
     .on(
       "postgres_changes",
       {
         event: "INSERT",
         schema: "public",
         table: "actions",
-        filter: `player_id=eq.${playerId}`,
+        filter: `room_id=eq.${roomId}`,
       },
       (payload) => {
-        if (payload.new?.room_id !== roomId) {
-          console.log("[realtime] ignored payload for other room:", {
-            expectedRoomId: roomId,
-            payloadRoomId: payload.new?.room_id,
-            playerId,
-          });
-          return;
-        }
-
-        if (payload.new?.player_id !== playerId) {
-          console.log("[realtime] ignored payload for other player:", {
-            expectedPlayerId: playerId,
-            payloadPlayerId: payload.new?.player_id,
-            roomId,
-          });
-          return;
-        }
-
-        onPayload(payload);
+        onAction?.(payload);
       },
     )
     .subscribe((status) => {
-      console.log("[realtime] room subscription status:", status, {
-        roomId,
-        playerId,
-      });
-
       if (status === "SUBSCRIBED") {
         settleReady(resolveReady, status);
       }
