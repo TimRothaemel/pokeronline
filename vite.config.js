@@ -10,6 +10,8 @@ export default defineConfig({
         joinRoom: resolve(__dirname, "src/pages/room/join-room.html"),
         lobby: resolve(__dirname, "src/pages/lobby/lobby.html"),
         game: resolve(__dirname, "src/pages/game/game.html"),
+        impressum: resolve(__dirname, "src/pages/legal/impressum.html"),
+        datenschutz: resolve(__dirname, "src/pages/legal/datenschutz.html"),
       },
     },
   },
