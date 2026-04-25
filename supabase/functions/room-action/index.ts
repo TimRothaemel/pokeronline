@@ -35,6 +35,16 @@ type RoomRow = {
   min_blind: number | null;
 };
 
+class ActionError extends Error {
+  status: number;
+
+  constructor(message: string, status = 400) {
+    super(message);
+    this.name = "ActionError";
+    this.status = status;
+  }
+}
+
 async function loadRoom(roomId: string) {
   const { data, error } = await supabase
     .from("rooms")
@@ -43,7 +53,7 @@ async function loadRoom(roomId: string) {
     .single();
 
   if (error || !data) {
-    throw new Error(error?.message ?? "Room not found");
+    throw new ActionError(error?.message ?? "Room not found", 404);
   }
 
   return data as RoomRow;
@@ -56,7 +66,7 @@ async function loadPlayers(roomId: string) {
     .eq("room_id", roomId);
 
   if (error || !data) {
-    throw new Error(error?.message ?? "Players not found");
+    throw new ActionError(error?.message ?? "Players not found", 404);
   }
 
   return data
@@ -311,15 +321,15 @@ async function applyAction(
   const player = players.find((entry) => entry.id === playerId);
 
   if (!player) {
-    throw new Error("Player not found");
+    throw new ActionError("Player not found", 404);
   }
 
   if (state.phase === "finished") {
-    throw new Error("Hand already finished");
+    throw new ActionError("Hand already finished", 409);
   }
 
   if (state.currentPlayerId !== playerId) {
-    throw new Error("It is not this player's turn");
+    throw new ActionError("It is not this player's turn", 409);
   }
 
   const playerBet = state.playerBets[playerId] ?? 0;
@@ -335,7 +345,7 @@ async function applyAction(
 
   if (actionType === "check") {
     if (callAmount > 0) {
-      throw new Error("Check is not allowed while a bet is open");
+      throw new ActionError("Check is not allowed while a bet is open", 409);
     }
   }
 
@@ -346,11 +356,11 @@ async function applyAction(
 
   if (actionType === "raise") {
     if (amount <= 0) {
-      throw new Error("Raise amount must be greater than zero");
+      throw new ActionError("Raise amount must be greater than zero", 400);
     }
 
     if (chips < callAmount + amount) {
-      throw new Error("Not enough chips for this raise");
+      throw new ActionError("Not enough chips for this raise", 409);
     }
 
     chipsToDeduct = callAmount + amount;
@@ -469,7 +479,7 @@ async function runAutoAction(roomId: string, room: RoomRow, state: RoomGameState
   const currentPlayer = players.find((player) => player.id === state.currentPlayerId);
 
   if (!currentPlayer?.is_bot) {
-    throw new Error("Current player is not a bot");
+    throw new ActionError("Current player is not a bot", 409);
   }
 
   const decision = getBotDecision(currentPlayer, state, room.min_blind ?? 25);
@@ -550,9 +560,10 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error("room-action failed", error);
     const message = error instanceof Error ? error.message : "room-action failed";
+    const status = error instanceof ActionError ? error.status : 500;
 
     return new Response(JSON.stringify({ ok: false, message }), {
-      status: 500,
+      status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

@@ -14,6 +14,18 @@ export async function joinRoom(roomName, password, nickname) {
   });
 
   if (error) {
+    if (error.context) {
+      try {
+        const responseBody = await error.context.json();
+        return {
+          ok: false,
+          message: responseBody?.message ?? "Raum konnte nicht betreten werden.",
+        };
+      } catch (parseError) {
+        console.error("Error parsing room join response:", parseError);
+      }
+    }
+
     console.error("Error joining room:", error);
     return { ok: false, message: error.message };
   }

@@ -26,6 +26,7 @@ let currentPlayer = JSON.parse(localStorage.getItem("current_player") ?? "null")
 let currentRoom = JSON.parse(localStorage.getItem("current_room") ?? "null");
 let gameState = null;
 let startTriggered = false;
+let actionInFlight = false;
 
 async function hydrateCurrentState() {
   const [player, room] = await Promise.all([getPlayer(playerId), getRoom(roomId)]);
@@ -62,7 +63,11 @@ function updateActionButtons(game) {
   const isTurn = isPlayersTurn(game, playerId);
   const currentRoundBet = game?.playerBets?.[playerId] ?? 0;
   const callAmount = Math.max(0, (game?.currentBet ?? 0) - currentRoundBet);
-  const isFinished = !game || game.phase === "finished" || game.phase === WAITING_STATUS;
+  const isFinished =
+    !game ||
+    game.phase === "finished" ||
+    game.phase === WAITING_STATUS ||
+    actionInFlight;
 
   const checkButton = document.getElementById("btn_checken");
   const callButton = document.getElementById("btn_mitgehen");
@@ -128,9 +133,30 @@ function renderGameState() {
   }
 
   if (gameState.currentPlayerId === playerId) {
-    displayTurnMessage("Du bist am Zug.");
+    displayTurnMessage(actionInFlight ? "Aktion wird gesendet ..." : "Du bist am Zug.");
   } else {
     displayTurnMessage(`Warte auf Spieler ${gameState.currentPlayerId ?? "-"}.`);
+  }
+}
+
+async function performAction(actionType, amount = 0) {
+  if (actionInFlight) {
+    return;
+  }
+
+  actionInFlight = true;
+  renderGameState();
+
+  try {
+    const result = await submitGameAction(actionType, amount);
+    await hydrateCurrentState();
+
+    if (!result?.ok) {
+      displayMessage(result?.message ?? "Aktion konnte nicht ausgeführt werden.");
+    }
+  } finally {
+    actionInFlight = false;
+    renderGameState();
   }
 }
 
@@ -159,18 +185,6 @@ async function ensureGameStarted() {
     currentRoom = state?.room ?? currentRoom;
     await startGameLoop(roomId);
     await hydrateCurrentState();
-
-    if (gameState?.currentPlayerId && isHost) {
-      const currentBot = currentRoom?.status ? parseGameState(currentRoom.status) : gameState;
-      if (currentBot?.currentPlayerId && currentBot.currentPlayerId !== playerId) {
-        const result = await submitGameAction("auto");
-        if (!result?.ok) {
-          displayMessage(result?.message ?? "Bot-Aktion konnte nicht ausgeführt werden.");
-        }
-        await hydrateCurrentState();
-      }
-    }
-
     renderGameState();
     return;
   }
@@ -190,20 +204,14 @@ await ensureGameStarted();
 const betBtn = document.getElementById("btn_checken");
 if (betBtn) {
   betBtn.addEventListener("click", async () => {
-    const result = await submitGameAction("check");
-    if (!result?.ok) {
-      displayMessage(result?.message ?? "Aktion konnte nicht ausgeführt werden.");
-    }
+    await performAction("check");
   });
 }
 
 const callBtn = document.getElementById("btn_mitgehen");
 if (callBtn) {
   callBtn.addEventListener("click", async () => {
-    const result = await submitGameAction("call");
-    if (!result?.ok) {
-      displayMessage(result?.message ?? "Aktion konnte nicht ausgeführt werden.");
-    }
+    await performAction("call");
   });
 }
 
@@ -212,20 +220,14 @@ if (raiseBtn) {
   raiseBtn.addEventListener("click", async () => {
     const raiseInput = document.getElementById("raise-amount");
     const raiseAmount = Number(raiseInput?.value ?? "0");
-    const result = await submitGameAction("raise", raiseAmount);
-    if (!result?.ok) {
-      displayMessage(result?.message ?? "Aktion konnte nicht ausgeführt werden.");
-    }
+    await performAction("raise", raiseAmount);
   });
 }
 
 const foldBtn = document.getElementById("btn_passen");
 if (foldBtn) {
   foldBtn.addEventListener("click", async () => {
-    const result = await submitGameAction("fold");
-    if (!result?.ok) {
-      displayMessage(result?.message ?? "Aktion konnte nicht ausgeführt werden.");
-    }
+    await performAction("fold");
   });
 }
 

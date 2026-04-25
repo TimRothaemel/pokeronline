@@ -14,6 +14,18 @@ export async function createRoom(roomName, password, nickname) {
   });
 
   if (error) {
+    if (error.context) {
+      try {
+        const responseBody = await error.context.json();
+        return {
+          ok: false,
+          message: responseBody?.message ?? "Raum konnte nicht erstellt werden.",
+        };
+      } catch (parseError) {
+        console.error("Error parsing room creation response:", parseError);
+      }
+    }
+
     console.error("Error creating room:", error);
     return { ok: false, message: error.message };
   }

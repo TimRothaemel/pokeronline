@@ -9,16 +9,30 @@ export async function submitGameAction(actionType, amount = 0) {
     return { ok: false, message: "Spielstatus unvollständig." };
   }
 
+  const payload = {
+    roomId,
+    playerId,
+    actionType,
+    amount,
+  };
+
   const { data, error } = await supabase.functions.invoke("room-action", {
-    body: {
-      roomId,
-      playerId,
-      actionType,
-      amount,
-    },
+    body: payload,
   });
 
   if (error) {
+    if (error.context) {
+      try {
+        const responseBody = await error.context.json();
+        return {
+          ok: false,
+          message: responseBody?.message ?? "Aktion konnte nicht ausgeführt werden.",
+        };
+      } catch (parseError) {
+        console.error("Error parsing function error response:", parseError);
+      }
+    }
+
     console.error("Error submitting action:", error);
     return { ok: false, message: error.message };
   }
