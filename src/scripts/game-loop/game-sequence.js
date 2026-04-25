@@ -19,6 +19,7 @@ import { subscribeToGame } from "../supabase/realtime/realtime-updates.js";
 import { getPlayerId } from "../supabase/player/get-player-id.js";
 import { getPlayer } from "../player/get-player.js";
 import { getRoom } from "../supabase/rooms/get-room.js";
+import { loadPlayers } from "../supabase/player/load-player.js";
 
 const roomId = localStorage.getItem("room_id");
 const playerId = getPlayerId();
@@ -27,6 +28,7 @@ let currentRoom = JSON.parse(localStorage.getItem("current_room") ?? "null");
 let gameState = null;
 let startTriggered = false;
 let actionInFlight = false;
+let botActionInFlight = false;
 
 async function hydrateCurrentState() {
   const [player, room] = await Promise.all([getPlayer(playerId), getRoom(roomId)]);
@@ -38,6 +40,38 @@ async function hydrateCurrentState() {
     currentRoom = room;
     localStorage.setItem("current_room", JSON.stringify(room));
     gameState = parseGameState(room.status);
+  }
+}
+
+async function maybeRunBotTurn() {
+  if (actionInFlight || botActionInFlight || !gameState?.currentPlayerId) {
+    return;
+  }
+
+  const isHost = await checkHost(roomId);
+  if (!isHost) {
+    return;
+  }
+
+  const players = await loadPlayers(roomId);
+  const currentTurnPlayer = players.find((player) => player.id === gameState.currentPlayerId);
+
+  if (!currentTurnPlayer?.is_bot) {
+    return;
+  }
+
+  botActionInFlight = true;
+
+  try {
+    const result = await submitGameAction("auto");
+    await hydrateCurrentState();
+
+    if (!result?.ok) {
+      displayMessage(result?.message ?? "Bot-Aktion konnte nicht ausgeführt werden.");
+    }
+  } finally {
+    botActionInFlight = false;
+    renderGameState();
   }
 }
 
@@ -157,6 +191,7 @@ async function performAction(actionType, amount = 0) {
   } finally {
     actionInFlight = false;
     renderGameState();
+    await maybeRunBotTurn();
   }
 }
 
@@ -164,6 +199,7 @@ const subscription = subscribeToGame(roomId, {
   onRoomUpdate: async () => {
     await hydrateCurrentState();
     renderGameState();
+    await maybeRunBotTurn();
   },
   onAction: async (payload) => {
     const { action_type: actionType, amount } = payload.new;
@@ -171,6 +207,7 @@ const subscription = subscribeToGame(roomId, {
     displayMessage(`Aktion: ${actionType}${amountLabel}`);
     await hydrateCurrentState();
     renderGameState();
+    await maybeRunBotTurn();
   },
 });
 
@@ -186,11 +223,13 @@ async function ensureGameStarted() {
     await startGameLoop(roomId);
     await hydrateCurrentState();
     renderGameState();
+    await maybeRunBotTurn();
     return;
   }
 
   await hydrateCurrentState();
   renderGameState();
+  await maybeRunBotTurn();
 }
 
 window.addEventListener("beforeunload", () => {

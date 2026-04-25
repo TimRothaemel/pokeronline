@@ -86,6 +86,10 @@ function getActivePlayerIds(state: RoomGameState) {
   return state.actingOrder.filter((playerId) => !state.foldedPlayerIds.includes(playerId));
 }
 
+function getLivePlayerIds(state: RoomGameState) {
+  return getActivePlayerIds(state).filter((playerId) => !state.allInPlayerIds.includes(playerId));
+}
+
 function getFirstPendingPlayer(state: RoomGameState) {
   return state.pendingPlayerIds.find(
     (playerId) =>
@@ -105,6 +109,24 @@ function createNextRoundQueue(state: RoomGameState, startPlayerId: string) {
   }
 
   return rotate(activePlayers, startIndex);
+}
+
+function getFirstPlayerLeftOfDealer(state: RoomGameState) {
+  const activePlayers = getActivePlayerIds(state);
+  if (activePlayers.length === 0) {
+    return null;
+  }
+
+  const dealerIndex = state.dealerPlayerId
+    ? state.actingOrder.indexOf(state.dealerPlayerId)
+    : -1;
+
+  if (dealerIndex < 0) {
+    return activePlayers[0] ?? null;
+  }
+
+  const orderedAfterDealer = rotate(state.actingOrder, (dealerIndex + 1) % state.actingOrder.length);
+  return orderedAfterDealer.find((playerId) => activePlayers.includes(playerId)) ?? null;
 }
 
 function advancePhase(state: RoomGameState) {
@@ -128,11 +150,7 @@ function advancePhase(state: RoomGameState) {
     river: 5,
     showdown: 5,
   } as const;
-  const activePlayers = getActivePlayerIds(state);
-  const firstPostFlopPlayer =
-    activePlayers.find(
-      (playerId) => state.actingOrder.indexOf(playerId) > state.dealerSeat,
-    ) ?? activePlayers[0] ?? null;
+  const firstPostFlopPlayer = getFirstPlayerLeftOfDealer(state);
 
   const resetBets = Object.fromEntries(
     Object.keys(state.playerBets).map((playerId) => [playerId, 0]),
@@ -165,6 +183,38 @@ function parseCards(serializedCards: string | null) {
     console.error("Failed to parse cards", error);
     return [];
   }
+}
+
+function buildSidePots(state: RoomGameState) {
+  const contributors = Object.entries(state.totalContributions)
+    .filter(([, amount]) => amount > 0)
+    .sort((left, right) => left[1] - right[1]);
+
+  const pots: Array<{ amount: number; eligiblePlayerIds: string[] }> = [];
+  let previousContribution = 0;
+
+  for (let index = 0; index < contributors.length; index += 1) {
+    const [playerId, contribution] = contributors[index];
+    const contributionStep = contribution - previousContribution;
+
+    if (contributionStep <= 0) {
+      continue;
+    }
+
+    const remainingContributors = contributors.slice(index).map(([id]) => id);
+    const potAmount = contributionStep * remainingContributors.length;
+    const eligiblePlayerIds = remainingContributors.filter(
+      (id) => !state.foldedPlayerIds.includes(id),
+    );
+
+    if (eligiblePlayerIds.length > 0 && potAmount > 0) {
+      pots.push({ amount: potAmount, eligiblePlayerIds });
+    }
+
+    previousContribution = contribution;
+  }
+
+  return pots;
 }
 
 async function updatePlayerChips(playerId: string, chips: number) {
@@ -242,32 +292,72 @@ async function finishHand(
     player,
     hand: evaluateBestHand([...parseCards(player.cards), ...communityCards]),
   }));
+  const handByPlayerId = new Map(
+    evaluatedPlayers.map((entry) => [entry.player.id, entry.hand]),
+  );
 
-  let best = evaluatedPlayers[0];
-  let winners = [best];
+  let bestOverall = evaluatedPlayers[0];
 
   for (const candidate of evaluatedPlayers.slice(1)) {
-    const comparison = compareHands(candidate.hand, best.hand);
+    const comparison = compareHands(candidate.hand, bestOverall.hand);
 
     if (comparison > 0) {
-      best = candidate;
-      winners = [candidate];
-      continue;
-    }
-
-    if (comparison === 0) {
-      winners.push(candidate);
+      bestOverall = candidate;
     }
   }
 
-  const splitPot = Math.floor(state.pot / winners.length);
-  let remainder = state.pot % winners.length;
+  const playersById = new Map(players.map((player) => [player.id, player]));
+  const winnings = new Map<string, number>();
+  const sidePots = buildSidePots(state);
 
-  for (const winner of winners) {
-    const bonus = remainder > 0 ? 1 : 0;
-    remainder -= bonus;
-    await updatePlayerChips(winner.player.id, (winner.player.chips ?? 0) + splitPot + bonus);
-    await writeActionLog(roomId, winner.player.id, "win", splitPot + bonus, "system");
+  for (const sidePot of sidePots) {
+    const eligibleEntries = sidePot.eligiblePlayerIds
+      .map((playerId) => ({
+        playerId,
+        hand: handByPlayerId.get(playerId) ?? null,
+      }))
+      .filter((entry) => entry.hand);
+
+    if (eligibleEntries.length === 0) {
+      continue;
+    }
+
+    let winners = [eligibleEntries[0]];
+
+    for (const candidate of eligibleEntries.slice(1)) {
+      const comparison = compareHands(candidate.hand!, winners[0].hand!);
+
+      if (comparison > 0) {
+        winners = [candidate];
+        continue;
+      }
+
+      if (comparison === 0) {
+        winners.push(candidate);
+      }
+    }
+
+    const splitAmount = Math.floor(sidePot.amount / winners.length);
+    let remainder = sidePot.amount % winners.length;
+
+    for (const winner of winners) {
+      const bonus = remainder > 0 ? 1 : 0;
+      remainder -= bonus;
+      winnings.set(
+        winner.playerId,
+        (winnings.get(winner.playerId) ?? 0) + splitAmount + bonus,
+      );
+    }
+  }
+
+  for (const [winnerId, amount] of winnings.entries()) {
+    const winner = playersById.get(winnerId);
+    if (!winner) {
+      continue;
+    }
+
+    await updatePlayerChips(winnerId, (winner.chips ?? 0) + amount);
+    await writeActionLog(roomId, winnerId, "win", amount, "system");
   }
 
   const finishedState: RoomGameState = {
@@ -275,8 +365,8 @@ async function finishHand(
     phase: "finished",
     currentPlayerId: null,
     pendingPlayerIds: [],
-    winnerIds: winners.map((winner) => winner.player.id),
-    winningHand: best.hand.label,
+    winnerIds: [...winnings.keys()],
+    winningHand: bestOverall.hand.label,
     revealedCount: 5,
     updatedAt: new Date().toISOString(),
   };
@@ -307,6 +397,56 @@ function getBotDecision(player: PlayerRow, state: RoomGameState, minBlind: numbe
   }
 
   return { actionType: "call" as const, amount: 0 };
+}
+
+function shouldAutoRunToShowdown(state: RoomGameState) {
+  return state.phase !== "finished" && getLivePlayerIds(state).length === 0;
+}
+
+function revealCountForPhase(phase: RoomGameState["phase"]) {
+  if (phase === "flop") {
+    return 3;
+  }
+
+  if (phase === "turn") {
+    return 4;
+  }
+
+  if (phase === "river" || phase === "showdown" || phase === "finished") {
+    return 5;
+  }
+
+  return 0;
+}
+
+async function runBoardToShowdown(
+  roomId: string,
+  room: RoomRow,
+  players: PlayerRow[],
+  state: RoomGameState,
+) {
+  let nextState = state;
+
+  while (nextState.phase !== "river") {
+    nextState = advancePhase({
+      ...nextState,
+      currentPlayerId: null,
+      pendingPlayerIds: [],
+    });
+  }
+
+  nextState = {
+    ...nextState,
+    revealedCount: revealCountForPhase("river"),
+    currentPlayerId: null,
+    pendingPlayerIds: [],
+  };
+
+  return finishHand(roomId, room, players, {
+    ...nextState,
+    phase: "showdown",
+    revealedCount: 5,
+  });
 }
 
 async function applyAction(
@@ -405,6 +545,10 @@ async function applyAction(
       ...state.playerBets,
       [playerId]: nextPlayerBet,
     },
+    totalContributions: {
+      ...state.totalContributions,
+      [playerId]: (state.totalContributions[playerId] ?? 0) + chipsToDeduct,
+    },
     pendingPlayerIds: nextPending,
     lastAction: {
       playerId,
@@ -419,6 +563,10 @@ async function applyAction(
 
   if (getActivePlayerIds(nextState).length === 1) {
     return finishHand(roomId, room, players, nextState);
+  }
+
+  if (shouldAutoRunToShowdown(nextState)) {
+    return runBoardToShowdown(roomId, room, players, nextState);
   }
 
   const nextPlayerId = getFirstPendingPlayer(nextState);
@@ -441,6 +589,9 @@ async function applyAction(
   }
 
   const advancedState = advancePhase(nextState);
+  if (shouldAutoRunToShowdown(advancedState)) {
+    return runBoardToShowdown(roomId, room, players, advancedState);
+  }
   await saveState(roomId, advancedState);
   return advancedState;
 }

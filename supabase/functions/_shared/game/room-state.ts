@@ -14,6 +14,7 @@ export type GameActionType = "check" | "call" | "raise" | "fold";
 export type RoomGameState = {
   version: 1;
   phase: GamePhase;
+  dealerPlayerId: string | null;
   dealerSeat: number;
   smallBlind: number;
   bigBlind: number;
@@ -25,6 +26,7 @@ export type RoomGameState = {
   foldedPlayerIds: string[];
   allInPlayerIds: string[];
   playerBets: Record<string, number>;
+  totalContributions: Record<string, number>;
   revealedCount: number;
   winnerIds: string[];
   winningHand: string | null;

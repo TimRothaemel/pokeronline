@@ -1,5 +1,9 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { serializeRoomGameState, type RoomGameState } from "../_shared/game/room-state.ts";
+import {
+  parseRoomGameState,
+  serializeRoomGameState,
+  type RoomGameState,
+} from "../_shared/game/room-state.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,6 +30,10 @@ function rotate<T>(items: T[], startIndex: number) {
   return items.slice(startIndex).concat(items.slice(0, startIndex));
 }
 
+function getNextIndex(length: number, startIndex: number, offset = 1) {
+  return (startIndex + offset) % length;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -43,7 +51,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: room, error: roomError } = await supabase
       .from("rooms")
-      .select("id, min_blind")
+      .select("id, min_blind, status")
       .eq("id", roomId)
       .single();
 
@@ -95,10 +103,27 @@ Deno.serve(async (req: Request) => {
     const minBlind = room.min_blind ?? 50;
     const smallBlind = Math.max(25, Math.floor(minBlind / 2));
     const bigBlind = minBlind;
-    const smallBlindPlayer = orderedPlayers[0];
-    const bigBlindPlayer = orderedPlayers[1];
     const orderedIds = orderedPlayers.map((player) => player.id);
     const playerBets = Object.fromEntries(orderedIds.map((id) => [id, 0]));
+    const totalContributions = Object.fromEntries(orderedIds.map((id) => [id, 0]));
+    const previousState = parseRoomGameState(room.status);
+
+    let dealerIndex = 0;
+    if (previousState?.dealerPlayerId) {
+      const previousDealerIndex = orderedIds.indexOf(previousState.dealerPlayerId);
+      if (previousDealerIndex >= 0) {
+        dealerIndex = getNextIndex(orderedPlayers.length, previousDealerIndex);
+      }
+    }
+
+    const smallBlindIndex =
+      orderedPlayers.length === 2
+        ? dealerIndex
+        : getNextIndex(orderedPlayers.length, dealerIndex);
+    const bigBlindIndex = getNextIndex(orderedPlayers.length, smallBlindIndex);
+
+    const smallBlindPlayer = orderedPlayers[smallBlindIndex];
+    const bigBlindPlayer = orderedPlayers[bigBlindIndex];
 
     const paidSmallBlind = Math.min(smallBlindPlayer.chips ?? 0, smallBlind);
     const paidBigBlind = Math.min(bigBlindPlayer.chips ?? 0, bigBlind);
@@ -115,6 +140,8 @@ Deno.serve(async (req: Request) => {
 
     playerBets[smallBlindPlayer.id] = paidSmallBlind;
     playerBets[bigBlindPlayer.id] = paidBigBlind;
+    totalContributions[smallBlindPlayer.id] = paidSmallBlind;
+    totalContributions[bigBlindPlayer.id] = paidBigBlind;
 
     const allInPlayerIds = orderedPlayers
       .filter((player) => {
@@ -130,15 +157,19 @@ Deno.serve(async (req: Request) => {
       })
       .map((player) => player.id);
 
-    const pendingPlayerIds = rotate(
-      orderedIds,
-      (orderedIds.indexOf(bigBlindPlayer.id) + 1) % orderedIds.length,
-    ).filter((playerId) => !allInPlayerIds.includes(playerId));
+    const preflopStartIndex =
+      orderedPlayers.length === 2
+        ? dealerIndex
+        : getNextIndex(orderedPlayers.length, bigBlindIndex);
+    const pendingPlayerIds = rotate(orderedIds, preflopStartIndex).filter(
+      (playerId) => !allInPlayerIds.includes(playerId),
+    );
 
     const state: RoomGameState = {
       version: 1,
       phase: "preflop",
-      dealerSeat: orderedPlayers.length - 1,
+      dealerPlayerId: orderedPlayers[dealerIndex].id,
+      dealerSeat: orderedPlayers[dealerIndex].seat_position ?? dealerIndex,
       smallBlind,
       bigBlind,
       currentBet: paidBigBlind,
@@ -149,6 +180,7 @@ Deno.serve(async (req: Request) => {
       foldedPlayerIds: [],
       allInPlayerIds,
       playerBets,
+      totalContributions,
       revealedCount: 0,
       winnerIds: [],
       winningHand: null,
