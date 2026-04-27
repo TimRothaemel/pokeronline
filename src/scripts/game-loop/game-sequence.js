@@ -26,21 +26,147 @@ const playerId = getPlayerId();
 let currentPlayer = JSON.parse(localStorage.getItem("current_player") ?? "null");
 let currentRoom = JSON.parse(localStorage.getItem("current_room") ?? "null");
 let gameState = null;
+let roomPlayers = [];
+let actionFeedEntries = [];
 let startTriggered = false;
 let actionInFlight = false;
 let botActionInFlight = false;
 
 async function hydrateCurrentState() {
-  const [player, room] = await Promise.all([getPlayer(playerId), getRoom(roomId)]);
+  const [player, room, players] = await Promise.all([
+    getPlayer(playerId),
+    getRoom(roomId),
+    loadPlayers(roomId),
+  ]);
+
   if (player) {
     currentPlayer = player;
     localStorage.setItem("current_player", JSON.stringify(player));
   }
+
   if (room) {
     currentRoom = room;
     localStorage.setItem("current_room", JSON.stringify(room));
     gameState = parseGameState(room.status);
   }
+
+  roomPlayers = players;
+}
+
+function getPlayerName(targetPlayerId) {
+  if (!targetPlayerId) {
+    return "Unknown";
+  }
+
+  const player = roomPlayers.find((entry) => entry.id === targetPlayerId);
+  return player?.nickname ?? targetPlayerId.slice(0, 8);
+}
+
+function formatActionEntry({ playerId: actorId, actionType, amount }) {
+  const actor = getPlayerName(actorId);
+
+  if (actionType === "small_blind") {
+    return `${actor} posts the small blind of ${amount}.`;
+  }
+
+  if (actionType === "big_blind") {
+    return `${actor} posts the big blind of ${amount}.`;
+  }
+
+  if (actionType === "win") {
+    return `${actor} wins ${amount}.`;
+  }
+
+  if (actionType === "raise") {
+    return `${actor} raises and puts in ${amount}.`;
+  }
+
+  if (actionType === "call") {
+    return `${actor} calls ${amount}.`;
+  }
+
+  if (actionType === "check") {
+    return `${actor} checks.`;
+  }
+
+  if (actionType === "fold") {
+    return `${actor} folds.`;
+  }
+
+  return `${actor} acts.`;
+}
+
+function pushActionEntry(entry) {
+  actionFeedEntries = [formatActionEntry(entry), ...actionFeedEntries].slice(0, 10);
+}
+
+function renderActionFeed() {
+  const feed = document.getElementById("action-feed");
+  if (!feed) {
+    return;
+  }
+
+  if (actionFeedEntries.length === 0) {
+    feed.innerHTML = '<div class="action-entry is-system">No actions yet in this hand.</div>';
+    return;
+  }
+
+  feed.innerHTML = actionFeedEntries
+    .map((message) => `<div class="action-entry">${message}</div>`)
+    .join("");
+}
+
+function renderPlayerStatusBoard() {
+  const list = document.getElementById("player-status-list");
+  if (!list) {
+    return;
+  }
+
+  if (roomPlayers.length === 0) {
+    list.innerHTML = "";
+    return;
+  }
+
+  list.innerHTML = roomPlayers
+    .map((player) => {
+      const isCurrentTurn = gameState?.currentPlayerId === player.id;
+      const isFolded = gameState?.foldedPlayerIds?.includes(player.id);
+      const isAllIn = gameState?.allInPlayerIds?.includes(player.id);
+      const isDealer = gameState?.dealerPlayerId === player.id;
+      const contribution = gameState?.playerBets?.[player.id] ?? 0;
+      const tags = [];
+
+      if (isDealer) {
+        tags.push('<span class="player-tag is-dealer">Dealer</span>');
+      }
+
+      if (isCurrentTurn) {
+        tags.push('<span class="player-tag is-turn">Acting</span>');
+      }
+
+      if (isFolded) {
+        tags.push('<span class="player-tag is-folded">Folded</span>');
+      }
+
+      if (isAllIn) {
+        tags.push('<span class="player-tag is-all-in">All-in</span>');
+      }
+
+      if (player.is_bot) {
+        tags.push('<span class="player-tag is-bot">Bot</span>');
+      }
+
+      return `
+        <div class="player-status-row ${isCurrentTurn ? "is-current-turn" : ""} ${isFolded ? "is-folded" : ""} ${isAllIn ? "is-all-in" : ""}">
+          <div class="player-status-main">
+            <span class="player-name">${player.nickname ?? "Player"}</span>
+            <span class="player-meta">Seat ${player.seat_position ?? "-"} · Chips ${player.chips ?? 0} · In pot ${contribution}</span>
+          </div>
+          <div class="player-tags">${tags.join("")}</div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 async function maybeRunBotTurn() {
@@ -53,9 +179,7 @@ async function maybeRunBotTurn() {
     return;
   }
 
-  const players = await loadPlayers(roomId);
-  const currentTurnPlayer = players.find((player) => player.id === gameState.currentPlayerId);
-
+  const currentTurnPlayer = roomPlayers.find((player) => player.id === gameState.currentPlayerId);
   if (!currentTurnPlayer?.is_bot) {
     return;
   }
@@ -138,39 +262,68 @@ function updateActionButtons(game) {
   }
 }
 
+function getTurnMessage() {
+  if (!currentRoom) {
+    return "Room wird geladen ...";
+  }
+
+  if (!gameState) {
+    return "Warte auf den Host, um die Runde zu starten.";
+  }
+
+  if (gameState.phase === "finished") {
+    return gameState.winnerIds?.includes(playerId)
+      ? "Du hast diese Hand gewonnen."
+      : "Die Hand ist beendet.";
+  }
+
+  if (gameState.currentPlayerId === playerId) {
+    return actionInFlight ? "Aktion wird gesendet ..." : "Du bist am Zug.";
+  }
+
+  return `Warte auf ${getPlayerName(gameState.currentPlayerId)}.`;
+}
+
+function getPrimaryMessage() {
+  if (!gameState) {
+    return "";
+  }
+
+  if (gameState.phase === "preflop") {
+    return "Preflop: Nur deine Hole Cards sind sichtbar.";
+  }
+
+  if (gameState.phase === "flop") {
+    return "Flop: Drei Community Cards sind aufgedeckt.";
+  }
+
+  if (gameState.phase === "turn") {
+    return "Turn: Die vierte Community Card ist aufgedeckt.";
+  }
+
+  if (gameState.phase === "river") {
+    return "River: Alle fünf Community Cards sind sichtbar.";
+  }
+
+  if (gameState.phase === "finished") {
+    const winnerNames = (gameState.winnerIds ?? []).map(getPlayerName).join(", ");
+    const handLabel = gameState.winningHand ? ` (${gameState.winningHand})` : "";
+    return `Gewinner: ${winnerNames}${handLabel}`;
+  }
+
+  return "";
+}
+
 function renderGameState() {
   updateCoins();
   revealPlayerCards();
   revealCommunityCards(getVisibleCommunityCardCount(gameState));
   updateMeta(gameState);
   updateActionButtons(gameState);
-
-  if (!currentRoom) {
-    displayTurnMessage("Room wird geladen ...");
-    displayMessage("");
-    return;
-  }
-
-  if (!gameState) {
-    displayTurnMessage("Warte auf den Host, um die Runde zu starten.");
-    displayMessage("");
-    return;
-  }
-
-  if (gameState.phase === "finished") {
-    const hasWon = gameState.winnerIds?.includes(playerId);
-    const outcome = hasWon ? "Du hast diese Hand gewonnen." : "Die Hand ist beendet.";
-    const handLabel = gameState.winningHand ? ` (${gameState.winningHand})` : "";
-    displayTurnMessage(outcome);
-    displayMessage(`Gewinner: ${gameState.winnerIds.join(", ")}${handLabel}`);
-    return;
-  }
-
-  if (gameState.currentPlayerId === playerId) {
-    displayTurnMessage(actionInFlight ? "Aktion wird gesendet ..." : "Du bist am Zug.");
-  } else {
-    displayTurnMessage(`Warte auf Spieler ${gameState.currentPlayerId ?? "-"}.`);
-  }
+  renderPlayerStatusBoard();
+  renderActionFeed();
+  displayTurnMessage(getTurnMessage());
+  displayMessage(getPrimaryMessage());
 }
 
 async function performAction(actionType, amount = 0) {
@@ -202,10 +355,12 @@ const subscription = subscribeToGame(roomId, {
     await maybeRunBotTurn();
   },
   onAction: async (payload) => {
-    const { action_type: actionType, amount } = payload.new;
-    const amountLabel = amount ? ` ${amount}` : "";
-    displayMessage(`Aktion: ${actionType}${amountLabel}`);
     await hydrateCurrentState();
+    pushActionEntry({
+      playerId: payload.new.player_id,
+      actionType: payload.new.action_type,
+      amount: payload.new.amount,
+    });
     renderGameState();
     await maybeRunBotTurn();
   },
@@ -222,12 +377,14 @@ async function ensureGameStarted() {
     currentRoom = state?.room ?? currentRoom;
     await startGameLoop(roomId);
     await hydrateCurrentState();
+    actionFeedEntries = [];
     renderGameState();
     await maybeRunBotTurn();
     return;
   }
 
   await hydrateCurrentState();
+  actionFeedEntries = [];
   renderGameState();
   await maybeRunBotTurn();
 }
@@ -285,8 +442,12 @@ if (nextHandBtn) {
       return;
     }
 
+    currentPlayer = state.player ?? currentPlayer;
+    currentRoom = state.room ?? currentRoom;
     await startGameLoop(roomId);
     await hydrateCurrentState();
+    actionFeedEntries = [];
     renderGameState();
+    await maybeRunBotTurn();
   });
 }

@@ -33,6 +33,15 @@ h2 {
   opacity: 0.8;
 }
 
+h3 {
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 12px;
+  opacity: 0.82;
+}
+
 /* --- Äußerer Rahmen (Tischrand) --- */
 #game-area-wrapper {
   max-width: 900px;
@@ -152,6 +161,22 @@ p {
   font-size: 0.95rem;
 }
 
+.player-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.stack-note {
+  margin-top: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+}
+
 .chip {
   display: inline-block;
   background: linear-gradient(135deg, #8b6914, #c9a84c, #e8c97a, #c9a84c, #8b6914);
@@ -168,6 +193,121 @@ p {
     0 1px 3px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   border: 1px solid rgba(139, 105, 20, 0.5);
+}
+
+.player-status-board {
+  margin-top: 18px;
+}
+
+.player-status-list {
+  display: grid;
+  gap: 10px;
+}
+
+.player-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(201, 168, 76, 0.16);
+}
+
+.player-status-row.is-current-turn {
+  border-color: rgba(201, 168, 76, 0.52);
+  box-shadow: 0 0 0 1px rgba(201, 168, 76, 0.22);
+}
+
+.player-status-row.is-folded {
+  opacity: 0.6;
+}
+
+.player-status-row.is-all-in {
+  border-color: rgba(21, 101, 192, 0.45);
+}
+
+.player-status-main {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.player-name {
+  font-size: 1rem;
+  color: #fff4cf;
+}
+
+.player-meta {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+.player-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.player-tag {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-tag.is-dealer {
+  background: rgba(201, 168, 76, 0.16);
+  border-color: rgba(201, 168, 76, 0.4);
+  color: #ffe6a1;
+}
+
+.player-tag.is-turn {
+  background: rgba(39, 174, 96, 0.18);
+  border-color: rgba(39, 174, 96, 0.42);
+  color: #b9ffd6;
+}
+
+.player-tag.is-folded {
+  background: rgba(146, 43, 33, 0.16);
+  border-color: rgba(146, 43, 33, 0.4);
+  color: #ffb3b3;
+}
+
+.player-tag.is-all-in {
+  background: rgba(21, 101, 192, 0.16);
+  border-color: rgba(21, 101, 192, 0.45);
+  color: #b3d9ff;
+}
+
+.player-tag.is-bot {
+  background: rgba(139, 105, 20, 0.18);
+  border-color: rgba(139, 105, 20, 0.4);
+  color: #f5e8c0;
+}
+
+.action-feed {
+  display: grid;
+  gap: 8px;
+}
+
+.action-entry {
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  color: #fff4cf;
+  font-size: 0.92rem;
+}
+
+.action-entry.is-system {
+  opacity: 0.8;
 }
 
 /* --- Aktions-Buttons --- */
@@ -297,6 +437,15 @@ p {
   #actions button {
     padding: 10px 16px;
     font-size: 0.75rem;
+  }
+
+  .player-status-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .player-tags {
+    justify-content: flex-start;
   }
 }
 .card img {

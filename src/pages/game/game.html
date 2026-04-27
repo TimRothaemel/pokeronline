@@ -52,10 +52,20 @@
           <div class="card" id="playercard1"></div>
           <div class="card" id="playercard2"></div>
         </div>
+        <div class="player-summary">
+          <p>Your chips: <span class="chip" id="player-coins"></span></p>
+          <p class="stack-note" id="stack-note">Starting stack: 5000</p>
+        </div>
+        <div class="player-status-board">
+          <h3>Table status</h3>
+          <div id="player-status-list" class="player-status-list"></div>
+        </div>
         <div class="message secondary" id="turn-container"></div>
         <div class="message" id="message-container"></div>
-
-        <p>Chips: <span class="chip" id="player-coins"></span></p>
+      </div>
+      <div class="table">
+        <h2>Hand-Verlauf</h2>
+        <div id="action-feed" class="action-feed"></div>
       </div>
       <div id="actions" class="table">
         <button id="btn_checken">Check</button>

@@ -11,5 +11,7 @@ export async function loadPlayers(roomId) {
     return [];
   }
 
-  return data ?? [];
+  return [...(data ?? [])].sort(
+    (left, right) => (left.seat_position ?? Number.MAX_SAFE_INTEGER) - (right.seat_position ?? Number.MAX_SAFE_INTEGER),
+  );
 }
