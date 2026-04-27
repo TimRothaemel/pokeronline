@@ -17,7 +17,7 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-const DEFAULT_CHIPS = 1000;
+const DEFAULT_CHIPS = 5000;
 
 type Player = {
   id: string;
