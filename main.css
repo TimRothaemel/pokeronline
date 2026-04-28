@@ -307,36 +307,70 @@ input[type="password"]:focus {
 }
 
 .legal-card {
-  padding: 22px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-strong) 100%);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
+  padding: 24px 26px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(12, 24, 18, 0.9) 0%, rgba(8, 16, 12, 0.96) 100%);
+  border: 1px solid rgba(214, 183, 92, 0.14);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
 }
 
 .legal-card h2 {
   margin: 0 0 12px;
   color: var(--gold-soft);
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
 .legal-card p {
   margin: 0;
-  line-height: 1.7;
-  color: var(--text);
+  line-height: 1.78;
+  color: rgba(246, 237, 209, 0.9);
 }
 
 .legal-card p + p {
   margin-top: 12px;
 }
 
+.legal-card a {
+  color: var(--gold-soft);
+  text-decoration: none;
+}
+
+.legal-card a:hover {
+  text-decoration: underline;
+}
+
 .legal-list {
   margin: 0;
-  padding-left: 20px;
-  color: var(--text);
-  line-height: 1.7;
+  padding-left: 22px;
+  color: rgba(246, 237, 209, 0.9);
+  line-height: 1.78;
+}
+
+.legal-list li + li {
+  margin-top: 8px;
+}
+
+.legal-shell .page-header {
+  padding: 10px 2px 4px;
+}
+
+.legal-shell .page-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.legal-shell .page-subtitle {
+  max-width: 70ch;
+  color: rgba(246, 237, 209, 0.8);
+}
+
+.legal-shell .back-link {
+  color: rgba(241, 223, 159, 0.86);
+}
+
+.legal-shell .eyebrow {
+  color: rgba(241, 223, 159, 0.76);
 }
 
 @media (max-width: 760px) {
