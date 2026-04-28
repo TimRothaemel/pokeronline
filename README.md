@@ -1,46 +1,55 @@
-# Online Poker Game
+# PokerOnline
 
-## Projektbeschreibung
-Dieses Projekt ist ein Online-Pokerspiel, das mit **JavaScript**, **HTML**, **CSS** und **Supabase** entwickelt wird. Ziel ist es, ein interaktives Multiplayer-Spiel zu erstellen, bei dem Spieler über das Internet gegeneinander antreten können. Das Projekt dient primär als Übung im Informatikunterricht, soll aber auch ein vollständiges, spielbares Poker-Erlebnis bieten.
+Ein einfaches Online-Pokerprojekt und Lernprojekt mit HTML, CSS, JavaScript und Supabase.
 
-Spieler können:
-- An einem virtuellen Pokertisch Platz nehmen.
-- Echtzeit-Pokerpartien gegen andere Spieler spielen.
+## Beschreibung
 
-## Technologien
+`PokerOnline` ist eine Webanwendung zum Erstellen und Spielen einfacher Pokerrunden. Die Seite ist als Fullscreen-Erlebnis aufgebaut und bietet eine Spiel-Erstellseite ohne klassische Karten-Kachelstruktur.
 
-### Frontend
-- **HTML**: Struktur der Webseite, Darstellung von Tischen, cards und Buttons.
-- **CSS**: Styling der Webseite, inklusive responsivem Layout und Animationen.
-- **JavaScript**: Spiel-Logik, Benutzerinteraktionen, cardsausgabe und Echtzeit-Updates.
+## Features
 
-### Backend & Datenbank
-- **Supabase**: Echtzeit-Datenbank und Authentifizierung. Supabase wird genutzt für:
-  - Speicherung von Spielständen und Tischinformationen
-  - Echtzeit-Synchronisation zwischen Spielern
+- Vollbild-Layout für Spielseiten
+- Spiel-Erstellseite mit Optionen für Spieltyp, Einsatz und Spieler
+- Rechtliche Impressumsseite
+- Gestaltet mit sauberem HTML/CSS
+- Backend-Integration geplant / teilweise umgesetzt mit Supabase
 
-### Weitere Tools
-- **Git**: Versionskontrolle.
-- **Visual Studio Code**: Entwicklungsumgebung.
-- **npm / yarn**: Paketverwaltung für JavaScript-Module (falls nötig).
+## Technologie
 
-## Funktionen
-1. **Benutzerverwaltung**
-   - Registrierung & Login über Supabase Auth.
-   - Speicherung von Benutzername, E-Mail und Passwort.
+- HTML
+- CSS
+- JavaScript
+- Supabase
 
-2. **Poker-Logik**
-   - Klassische Texas Hold'em Regeln.
-   - cards mischen, austeilen und Runde durchführen.
-   - Verwaltung von Chips, Einsätzen, Pots und Gewinnerberechnung.
+## Installation
 
-3. **Multiplayer & Echtzeit**
-   - Spieler können sich zu Tischen verbinden.
-   - Echtzeit-Synchronisation aller Spielaktionen via Supabase Realtime.
-   - Live-Updates für Einsätze, cards und Spielzüge.
+1. Repository klonen
+   ```bash
+   git clone https://github.com/<dein-nutzername>/pokeronline.git
+   cd pokeronline
+   ```
 
-## Zielsetzung
-- Erstellung eines voll funktionsfähigen Online-Pokerspiels.
-- Praktische Anwendung von Web-Technologien (Frontend + Backend).
-- Erfahrung mit Echtzeit-Kommunikation und Datenbanken.
-- Erweiterbarkeit: Das Projekt kann später um Features wie KI-Gegner, Lobby-System oder Turniere erweitert werden.
+2. Projekt lokal öffnen
+   - `index.html` im Browser öffnen
+   - oder lokalen Webserver starten:
+     ```bash
+     python3 -m http.server 8000
+     ```
+
+3. Mit Supabase verbinden
+   - Supabase-Projekt erstellen
+   - Konfigurationsdateien mit Projekt-URL und API-Schlüssel ergänzen
+
+## Struktur
+
+- `src/index.html` – Startseite / Spiel erstellen
+- `src/pages/legal/impressum.html` – Impressum
+- `src/main.css` – globale Styles
+
+## Weiterentwicklung
+
+- Spiel-Logik erweitern
+- Supabase-Authentifizierung und Datenbankanbindung
+- Mehrseitiges Navigationsmenü
+- Responsives Layout für mobile Geräte
+
