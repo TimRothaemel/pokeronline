@@ -25,7 +25,7 @@ Ein einfaches Online-Pokerprojekt und Lernprojekt mit HTML, CSS, JavaScript und 
 
 1. Repository klonen
    ```bash
-   git clone https://github.com/<dein-nutzername>/pokeronline.git
+   git clone https://github.com/TimRothaemel/pokeronline.git
    cd pokeronline
    ```
 
